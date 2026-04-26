@@ -143,64 +143,6 @@ static int cmd_x(char *args){
   return 0;
 }  
 
-static int cmd_d(char *args) {
-  char *NUM  = strtok(NULL, " ");
-  int num = atoi(NUM);
-  remove_watch(num);
-  return 0;
-}
-
-static int cmd_w(char *args) {
-  char *EXPR  = strtok(NULL, " ");
-  if(EXPR==NULL){
-    Log(" error expression\n");
-    return 0;
-  }
-  bool flag=true;
-  word_t addr = expr(EXPR,&flag);
-  if(flag==false){
-    Log("error expression\n");
-    return 0;
-  }
-  add_watch(EXPR,addr);
-  return 0;
-}
-
-static int cmd_p(char *args) {
-    bool success;
-    if(strcmp(args, "test") == 0) {
-        char str[5000];
-        uint64_t answer;
-        bool all_correct = true;
-        FILE *fp = fopen(NEMU_HOME_STR "/tools/gen-expr/build/input", "r");
-        assert(fp != NULL);
-        
-        while(fscanf(fp, "%lu %[^\n]", &answer, str) > 0) {
-            uint64_t result = expr(str, &success);
-            if(!success || result != answer) {
-                printf("calculate wrong,the expr is \"%s\"\n", str);
-                printf("your answer is: %lu, the true answer is: %lu\n",result,answer);
-                all_correct = false;
-                printf("tests not pass\n");
-                break;  
-            }
-        }
-        fclose(fp);
-        if(all_correct) {
-            printf("all tests pass\n");
-        }
-    }
-    else {
-        uint64_t result = expr(args, &success);
-        if(!success) {
-            printf("表达式计算错误\n");
-        }
-        else {
-            printf("%lu\n", result);
-        }
-    }
-    return 0;
-}
 
 static int cmd_help(char *args);
 
@@ -214,9 +156,6 @@ static struct {
   { "si", "execute one step", cmd_si },
   { "info", "use 'info r' to show register status ***and*** use 'info w' to show watch point message", cmd_info },
   { "x", "scan memory", cmd_x },
-  { "p", "expression evaluation", cmd_p },
-  { "w", "creat watchpoint", cmd_w },
-  { "d", "delete watchpoint", cmd_d },
   { "q", "Exit NEMU", cmd_q },
   /* TODO: Add more commands cmd_d*/
 };
