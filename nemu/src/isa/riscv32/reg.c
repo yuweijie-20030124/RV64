@@ -24,8 +24,28 @@ const char *regs[] = {
 };
 
 void isa_reg_display() {
+    printf("PC\t0x%016lx\t%ld\n", cpu.pc, cpu.pc);
+    for (int i = 0; i < 32; i++) {
+        printf("%s\t0x%016lx\t%ld", reg_name(i), gpr(i), gpr(i));
+        if ((i + 1) % 4 == 0) {
+            printf("\n");   // 每四个换行
+        } else {
+            printf("\t");   // 否则输出制表符作为分隔
+        }
+    }
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {
-  return 0;
+  int idx=0;
+  char str[10];
+  strcpy(str,s+1); //去除最左边的$
+  if(strcmp(str,"pc")==0) return cpu.pc; //如果是pc那就返回cpu.pc的值
+  for(int i=0;i<32;i++){
+    if(strcmp(regs[i],str)==0){
+      idx=i; //返回索引值
+      break;
+    }
+    if(i==31) *success=false;
+  }
+  return gpr(idx);
 }
