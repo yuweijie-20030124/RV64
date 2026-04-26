@@ -38,6 +38,13 @@ void isa_reg_display() {
             printf("  ");   // 两个空格分隔不同寄存器块
         }
     }
+
+    //打印csr寄存器
+    printf("%-8s 0x%016lx %12ld\n", "PC", cpu.mcause  , cpu.mcause  );
+    printf("%-8s 0x%016lx %12ld\n", "PC", cpu.mstatus , cpu.mstatus );
+    printf("%-8s 0x%016lx %12ld\n", "PC", cpu.mepc    , cpu.mepc    );
+    printf("%-8s 0x%016lx %12ld\n", "PC", cpu.mtvec   , cpu.mtvec   );
+    printf("\n");
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {
