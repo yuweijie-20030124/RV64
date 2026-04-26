@@ -39,9 +39,9 @@ void isa_reg_display() {
     
     // 打印 CSR 寄存器，单独一行，保持对齐
     printf("\n");  // 在寄存器组后换行
-    printf("%-8s 0x%016lx %12ld\n", "mcause", cpu.mcause, cpu.mcause);
-    printf("%-8s 0x%016lx %12ld\n", "mstatus", cpu.mstatus, cpu.mstatus);
-    printf("%-8s 0x%016lx %12ld\n", "mepc", cpu.mepc, cpu.mepc);
+    printf("%-8s 0x%016lx %12ld", "mcause", cpu.mcause, cpu.mcause);
+    printf("%-8s 0x%016lx %12ld", "mstatus", cpu.mstatus, cpu.mstatus);
+    printf("%-8s 0x%016lx %12ld", "mepc", cpu.mepc, cpu.mepc);
     printf("%-8s 0x%016lx %12ld\n", "mtvec", cpu.mtvec, cpu.mtvec);  // 修正：您原来用的是 cpu.mepc
 }
 
