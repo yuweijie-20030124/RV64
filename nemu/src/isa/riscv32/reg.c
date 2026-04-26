@@ -42,7 +42,7 @@ void isa_reg_display() {
     printf("%-8s 0x%016lx %12ld  ", "mcause", cpu.mcause, cpu.mcause);
     printf("%-8s 0x%016lx %12ld  ", "mstatus", cpu.mstatus, cpu.mstatus);
     printf("%-8s 0x%016lx %12ld  ", "mepc", cpu.mepc, cpu.mepc);
-    printf("%-8s 0x%016lx %12ld\n", "mtvec", cpu.mtvec, cpu.mtvec);  // 修正：您原来用的是 cpu.mepc
+    printf("%-8s 0x%016lx %12ld\n", "mtvec", cpu.mtvec, cpu.mtvec); 
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {
