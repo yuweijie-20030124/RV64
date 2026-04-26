@@ -83,17 +83,7 @@ static int cmd_si(char *args) {
 }
 
 static int cmd_info(char *args) {
-  if (args == NULL) {
-    isa_reg_display();
-    return 0;
-  }
-
-  // if (strcmp(args, "r") == 0) {
-  
-  // } 
-  // else{
-  //   printf("print r , not'%s'\n", args);
-  //   }
+  isa_reg_display();
   return 0;
 }
 
