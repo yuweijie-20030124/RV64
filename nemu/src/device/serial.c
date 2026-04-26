@@ -25,16 +25,16 @@ static uint8_t *serial_base = NULL;
 
 
 static void serial_putc(char ch) {
-  MUXDEF(CONFIG_TARGET_AM, putch(ch), putc(ch, stderr));
+  MUXDEF(CONFIG_TARGET_AM, putch(ch), putc(ch, stderr)); //如果没用am那就用标准io库，如果用了am那就用自己实现的putch
 }
 
 static void serial_io_handler(uint32_t offset, int len, bool is_write) {
-  assert(len == 1);
+  assert(len == 1);  //检查访问长度（len 必须是 1，因为串口通常按字节操作）
   switch (offset) {
     /* We bind the serial port with the host stderr in NEMU. */
     case CH_OFFSET:
-      if (is_write) serial_putc(serial_base[0]);
-      else panic("do not support read");
+      if (is_write) serial_putc(serial_base[0]); //如果偏移是0且写操作，那就直接给串口发送一个字节。
+      else panic("do not support read");      //如果读操作就直接报错。
       break;
     default: panic("do not support offset = %d", offset);
   }
