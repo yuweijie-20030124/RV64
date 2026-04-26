@@ -88,12 +88,12 @@ static int cmd_info(char *args) {
     return 0;
   }
 
-  if (strcmp(args, "r") == 0) {
-  } 
-
-    else{
-    printf("print r , not'%s'\n", args);
-    }
+  // if (strcmp(args, "r") == 0) {
+  
+  // } 
+  // else{
+  //   printf("print r , not'%s'\n", args);
+  //   }
   return 0;
 }
 
