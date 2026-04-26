@@ -33,6 +33,10 @@ void isa_reg_display() {
             printf("\t");   // 否则输出制表符作为分隔
         }
     }
+    printf("mcause\t0x%016lx\t%ld\n",cpu.mcause,cpu.mcause);
+    printf("mstatus\t0x%016lx\t%ld\n",cpu.mstatus,cpu.mstatus);
+    printf("mepc\t0x%016lx\t%ld\n",cpu.mepc,cpu.mepc);
+    printf("mtvec\t0x%016lx\t%ld\n",cpu.mepc,cpu.mtvec);
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {
