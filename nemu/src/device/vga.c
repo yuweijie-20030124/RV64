@@ -16,8 +16,9 @@
 #include <common.h>
 #include <device/map.h>
 
-#define SCREEN_W (MUXDEF(CONFIG_VGA_SIZE_800x600, 800, 400))
-#define SCREEN_H (MUXDEF(CONFIG_VGA_SIZE_800x600, 600, 300))
+//修改设置
+#define SCREEN_W (MUXDEF(CONFIG_VGA_SIZE_800x600, 800, 200))
+#define SCREEN_H (MUXDEF(CONFIG_VGA_SIZE_800x600, 600, 150))
 
 static uint32_t screen_width() {
   return MUXDEF(CONFIG_TARGET_AM, io_read(AM_GPU_CONFIG).width, SCREEN_W);
@@ -44,7 +45,7 @@ static SDL_Texture *texture = NULL;
 static void init_screen() {
   SDL_Window *window = NULL;
   char title[128];
-  sprintf(title, "%s-NEMU", str(__GUEST_ISA__));
+  sprintf(title, "%s-NEMU-screen", str(__GUEST_ISA__));
   SDL_Init(SDL_INIT_VIDEO);
   SDL_CreateWindowAndRenderer(
       SCREEN_W * (MUXDEF(CONFIG_VGA_SIZE_400x300, 2, 1)),
@@ -66,19 +67,23 @@ static inline void update_screen() {
 static void init_screen() {}
 
 static inline void update_screen() {
-  io_write(AM_GPU_FBDRAW, 0, 0, vmem, screen_width(), screen_height(), true);
+  io_write( 0, 0, vmem, screen_width(), screen_height(), true);
 }
 #endif
 #endif
 
-void vga_update_screen() {
+void vga_update_screen() {//更新屏幕
+  if(vgactl_port_base[1] == 1){
+  update_screen();
+  vgactl_port_base[1]= 0;
+  }
   // TODO: call `update_screen()` when the sync register is non-zero,
   // then zero out the sync register
 }
 
 void init_vga() {
   vgactl_port_base = (uint32_t *)new_space(8);
-  vgactl_port_base[0] = (screen_width() << 16) | screen_height();
+  vgactl_port_base[0] = (screen_width() << 16) | screen_height();//宽是高16位，高是低16位
 #ifdef CONFIG_HAS_PORT_IO
   add_pio_map ("vgactl", CONFIG_VGA_CTL_PORT, vgactl_port_base, 8, NULL);
 #else
@@ -90,3 +95,8 @@ void init_vga() {
   IFDEF(CONFIG_VGA_SHOW_SCREEN, init_screen());
   IFDEF(CONFIG_VGA_SHOW_SCREEN, memset(vmem, 0, screen_size()));
 }
+
+//C 库函数 void *memset(void *str, int c, size_t n) 用于将一段内存区域设置为指定的值。
+//memset((void *)0xa1000000, 0, SCR_SIZE);
+/*对x86来说, 内存映射I/O的一个例子是NEMU中的物理地址区间[0xa1000000, 0xa1800000). 
+这段物理地址区间被映射到VGA内部的显存, 读写这段物理地址区间就相当于对读写VGA显存的数据. 例如*/

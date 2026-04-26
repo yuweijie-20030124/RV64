@@ -13,15 +13,25 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
+/*
+模拟PS/2键盘控制器（i8042芯片）的行为，
+将宿主机的键盘输入转换为模拟系统的键盘中断信号。
+通过KEYDOWN_MASK (0x8000)区分按键按下（最高位为1）和释放（最高位为0）。
+使用循环队列缓冲键盘事件，避免输入丢失。
+*/
 #include <device/map.h>
 #include <utils.h>
 
 #define KEYDOWN_MASK 0x8000
+//断码等于通码 + 0x80 
+//对于断码和通码可以这样理解，它们由8位比特组成，
+//最高位第7位表示按键状态，1表示按下，0表示弹起。
 
 #ifndef CONFIG_TARGET_AM
-#include <SDL2/SDL.h>
+#include <SDL2/SDL.h> //依赖SDL库获取键盘输入。
 
 // Note that this is not the standard
+// 通过这个宏生成枚举和键位映射表 keymap[256]，将 SDL 的扫描码（如 SDL_SCANCODE_A）映射到 NEMU 自定义的键值（如 NEMU_KEY_A）。
 #define NEMU_KEYS(f) \
   f(ESCAPE) f(F1) f(F2) f(F3) f(F4) f(F5) f(F6) f(F7) f(F8) f(F9) f(F10) f(F11) f(F12) \
 f(GRAVE) f(1) f(2) f(3) f(4) f(5) f(6) f(7) f(8) f(9) f(0) f(MINUS) f(EQUALS) f(BACKSPACE) \
@@ -37,10 +47,11 @@ enum {
   NEMU_KEY_NONE = 0,
   MAP(NEMU_KEYS, NEMU_KEY_NAME)
 };
-
+//keymap[256]数组将SDL的扫描码（如SDL_SCANCODE_A）映射到NEMU自定义的键值（如NEMU_KEY_A）。
 #define SDL_KEYMAP(k) keymap[SDL_SCANCODE_ ## k] = NEMU_KEY_ ## k;
 static uint32_t keymap[256] = {};
 
+//初始化：init_keymap()函数通过宏展开填充keymap数组。
 static void init_keymap() {
   MAP(NEMU_KEYS, SDL_KEYMAP)
 }
@@ -49,9 +60,11 @@ static void init_keymap() {
 static int key_queue[KEY_QUEUE_LEN] = {};
 static int key_f = 0, key_r = 0;
 
+//key_f和key_r：队首和队尾指针，实现环形缓冲。
 static void key_enqueue(uint32_t am_scancode) {
-  key_queue[key_r] = am_scancode;
-  key_r = (key_r + 1) % KEY_QUEUE_LEN;
+  key_queue[key_r] = am_scancode; //key_queue[1024]：存储待处理的键盘事件。
+  key_r = (key_r + 1) % KEY_QUEUE_LEN; //指针回到头
+  //检测队列是否已满
   Assert(key_r != key_f, "key queue overflow!");
 }
 
@@ -64,6 +77,7 @@ static uint32_t key_dequeue() {
   return key;
 }
 
+//send_key()将SDL事件转换为模拟器事件。按键按下就把扫描码发过去
 void send_key(uint8_t scancode, bool is_keydown) {
   if (nemu_state.state == NEMU_RUNNING && keymap[scancode] != NEMU_KEY_NONE) {
     uint32_t am_scancode = keymap[scancode] | (is_keydown ? KEYDOWN_MASK : 0);
@@ -88,6 +102,9 @@ static void i8042_data_io_handler(uint32_t offset, int len, bool is_write) {
   i8042_data_port_base[0] = key_dequeue();
 }
 
+/*分配4字节内存空间作为数据端口。
+注册端口/内存的IO处理函数。
+初始化键位映射（非AM平台时）。*/
 void init_i8042() {
   i8042_data_port_base = (uint32_t *)new_space(4);
   i8042_data_port_base[0] = NEMU_KEY_NONE;
