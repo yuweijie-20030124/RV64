@@ -26,7 +26,7 @@ const char *regs[] = {
 void isa_reg_display() {
     printf("PC\t0x%016lx\t%ld\n", cpu.pc, cpu.pc);
     for (int i = 0; i < 32; i++) {
-        printf("%s\t0x%016lx\t%ld\t", reg_name(i), gpr(i), gpr(i));
+        printf("%s  0x%016lx\t%ld\t", reg_name(i), gpr(i), gpr(i));
         if ((i + 1) % 4 == 0) {
             printf("\n");   // 每四个换行
         } else {
