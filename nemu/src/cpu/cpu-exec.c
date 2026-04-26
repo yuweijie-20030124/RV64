@@ -88,7 +88,6 @@ static void execute(uint64_t n) {
     trace_and_difftest(&s, cpu.pc);
     if (nemu_state.state != NEMU_RUNNING) {break;}
 #ifdef CONFIG_DEVICE
-    // CoreMark 这类批量运行里每条指令都读一次 host 时间太贵了；批处理按固定指令间隔轮询设备，单步模式仍保持原粒度。
     if (unlikely(g_print_step)) {
       device_update();
     }
