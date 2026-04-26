@@ -25,11 +25,14 @@ const char *regs[] = {
 
 void isa_reg_display() {
     printf("PC\t0x%016lx\t%ld\n", cpu.pc, cpu.pc);
-  for (int i = 0; i < 32; i++) {
-    printf("%s\t0x%016lx\t%ld\n", reg_name(i), gpr(i), gpr(i));
-  }
+    for (int i = 0; i < 32; i++) {
+        printf("%s\t0x%016lx\t%ld\n", reg_name(i), gpr(i), gpr(i));
+        // 每四个寄存器后输出一个空行（且不是最后一个寄存器之后）
+        if ((i + 1) % 4 == 0 && i != 31) {
+            printf("\n");   // 输出一个空行
+        }
+    }
 }
-
 word_t isa_reg_str2val(const char *s, bool *success) {
   int idx=0;
   char str[10];
