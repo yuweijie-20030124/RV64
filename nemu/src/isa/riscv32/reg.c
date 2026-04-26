@@ -24,13 +24,18 @@ const char *regs[] = {
 };
 
 void isa_reg_display() {
-    printf("PC  0x%016lx\t%ld\n", cpu.pc, cpu.pc);
+    // 打印 PC，宽度与寄存器行保持一致
+    printf("%-8s 0x%016lx %12ld\n", "PC", cpu.pc, cpu.pc);
+
     for (int i = 0; i < 32; i++) {
-        printf("%s  0x%016lx\t%ld\t", reg_name(i), gpr(i), gpr(i));
+        // 每个寄存器占用固定宽度：名称8字符、十六进制16字符、十进制12字符
+        printf("%-8s 0x%016lx %12ld", reg_name(i), gpr(i), gpr(i));
+        
+        // 每打印4个寄存器换行，否则输出一个空格分隔（不用制表符）
         if ((i + 1) % 4 == 0) {
-            printf("\n");   // 每四个换行
+            printf("\n");
         } else {
-            printf("\t");   // 否则输出制表符作为分隔
+            printf("  ");   // 两个空格分隔不同寄存器块
         }
     }
 }
