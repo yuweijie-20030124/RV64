@@ -1,5 +1,5 @@
 /***************************************************************************************
-* Copyright (c) 2014-2024 Zihao Yu, Nanjing University
+* Copyright (c) 2014-2022 Zihao Yu, Nanjing University
 *
 * NEMU is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
@@ -31,39 +31,100 @@ static char *code_format =
 "  return 0; "
 "}";
 
-static void gen_rand_expr() {
-  buf[0] = '\0';
+static unsigned choose(unsigned n) {
+    return rand() % n;
+}
+
+static void gen(char s) {
+    char add_str[] = {s, '\0'};
+    strcat(buf, add_str);
+}
+
+static void gen_num() {
+    char num_str[70];
+    // 确保不生成0，避免除0情况（在gen_rand_expr中处理）
+    sprintf(num_str, "%u", choose(99) + 1); // 生成1-99的数字
+    strcat(buf, num_str);
+}
+
+static void gen_space() {
+    for (int i = 0; i < choose(5); i++) {
+        if (choose(11) > 9) {
+            strcat(buf, " ");
+        }
+    }
+}
+
+static void gen_rand_op() {
+    char op_list[] = {'+', '-', '*'};
+    char add_str[] = {op_list[choose(3)], '\0'};
+    strcat(buf, add_str);
+}
+
+static void gen_rand_expr(int depth) {
+    if (strlen(buf) > 65536 - 20000 || depth > 12) {
+        gen_num();
+        return;
+    }
+    gen_space();
+    switch (choose(3)) {
+        case 0: 
+            gen_num();
+            break;
+        case 1: 
+            gen('('); 
+            gen_rand_expr(depth + 1); 
+            gen(')');
+            break;
+        default: 
+            // 处理除法情况
+            if (choose(4) == 0) { // 25%概率生成除法
+                gen_rand_expr(depth + 1);
+                gen('/');
+                // 确保除数不为0
+                gen_num(); // 除数总是非零
+            } else {
+                gen_rand_expr(depth + 1);
+                gen_rand_op();
+                gen_rand_expr(depth + 1);
+            }
+            break;
+    }
+    gen_space();
 }
 
 int main(int argc, char *argv[]) {
-  int seed = time(0);
-  srand(seed);
-  int loop = 1;
-  if (argc > 1) {
-    sscanf(argv[1], "%d", &loop);
-  }
-  int i;
-  for (i = 0; i < loop; i ++) {
-    gen_rand_expr();
+    int seed = time(0);
+    srand(seed);
+    int loop = 1;
+    if (argc > 1) {
+        sscanf(argv[1], "%d", &loop);
+    }
+    int i;
+    for (i = 0; i < loop; i++) {
+        buf[0] = '\0';
+        gen_rand_expr(0);
 
-    sprintf(code_buf, code_format, buf);
+        sprintf(code_buf, code_format, buf);
 
-    FILE *fp = fopen("/tmp/.code.c", "w");
-    assert(fp != NULL);
-    fputs(code_buf, fp);
-    fclose(fp);
+        FILE *fp = fopen("/tmp/.code.c", "w");
+        assert(fp != NULL);
+        fputs(code_buf, fp);
+        fclose(fp);
 
-    int ret = system("gcc /tmp/.code.c -o /tmp/.expr");
-    if (ret != 0) continue;
+        int ret = system("gcc /tmp/.code.c -o /tmp/.expr");
+        if (ret != 0) continue;
 
-    fp = popen("/tmp/.expr", "r");
-    assert(fp != NULL);
+        fp = popen("/tmp/.expr", "r");
+        assert(fp != NULL);
 
-    int result;
-    ret = fscanf(fp, "%d", &result);
-    pclose(fp);
-
-    printf("%u %s\n", result, buf);
-  }
-  return 0;
+        uint32_t result;
+        if (fscanf(fp, "%u", &result)) {
+            if (pclose(fp) != 0) {
+                continue;
+            }
+            printf("%u %s\n", result, buf);
+        }
+    }
+    return 0;
 }
