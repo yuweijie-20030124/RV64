@@ -49,7 +49,7 @@ static int cmd_c(char *args) {
 
 
 static int cmd_q(char *args) {
-  set_nemu_state(NEMU_END, cpu.pc, 0);
+  // set_nemu_state(NEMU_END, cpu.pc, 0);
   return -1;
 }
 
