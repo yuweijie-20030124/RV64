@@ -16,7 +16,6 @@ Context* __am_irq_handle(Context *c) {
             break;
       default: ev.event = EVENT_ERROR; break;
     }
-    //printf("mcause = %s\n",c->mcause);
     c = user_handler(ev, c);    //调用之前注册的handler
      assert(c != NULL);
   }
