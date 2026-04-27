@@ -27,7 +27,7 @@ extern void __am_asm_trap(void);
 
 bool cte_init(Context*(*handler)(Event, Context*)) {
   // initialize exception entry
-  // asm volatile("csrw mtvec, %0" : : "r"(__am_asm_trap));
+  asm volatile("csrw mtvec, %0" : : "r"(__am_asm_trap));
 
   // register event handler
   user_handler = handler;
@@ -36,11 +36,7 @@ bool cte_init(Context*(*handler)(Event, Context*)) {
 }
 
 Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
-  Context *cp = (Context *)(kstack.end - sizeof(Context));
-  cp->mepc = (uintptr_t)entry;
-  cp->mstatus = 0x1800;
-  cp->gpr[10] = (uintptr_t)arg;   //a0传参
-  return cp;
+  return NULL;
 }
 
 void yield() {
