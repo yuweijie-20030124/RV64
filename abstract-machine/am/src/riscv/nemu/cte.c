@@ -6,6 +6,7 @@ static Context* (*user_handler)(Event, Context*) = NULL;
 
 Context* __am_irq_handle(Context *c) {
   if (user_handler) {
+    printf("in\n");
     Event ev = {0};
     switch (c->mcause) {
       case 11:
@@ -16,7 +17,6 @@ Context* __am_irq_handle(Context *c) {
             break;
       default: ev.event = EVENT_ERROR; break;
     }
-    printf("mcause = %s\n",c->mcause);
     c = user_handler(ev, c);    //调用之前注册的handler
      assert(c != NULL);
   }
