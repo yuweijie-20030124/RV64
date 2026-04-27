@@ -24,15 +24,25 @@ const char *regs[] = {
 };
 
 void isa_reg_display() {
-    printf("PC\t0x%016lx\t%ld\n", cpu.pc, cpu.pc);
+    // PC 单独一行，与其他寄存器保持相同的列宽格式
+    printf("%-8s 0x%016lx %12ld\n", "PC", cpu.pc, cpu.pc);
+    
+    // 每个寄存器占4列：名称(8)、十六进制(18，含0x)、十进制(12)
     for (int i = 0; i < 32; i++) {
-        printf("%s\t0x%016lx\t%ld", reg_name(i), gpr(i), gpr(i));
+        printf("%-8s 0x%016lx %12ld", reg_name(i), gpr(i), gpr(i));
         if ((i + 1) % 4 == 0) {
             printf("\n");   // 每四个换行
         } else {
-            printf("\t");   // 否则输出制表符作为分隔
+            printf("  ");   // 两个空格分隔寄存器块（不用制表符）
         }
     }
+    
+    // 打印 CSR 寄存器，单独一行，保持对齐
+    printf("\n");  // 在寄存器组后换行
+    printf("%-8s 0x%016lx %12ld  ", "mcause", cpu.mcause, cpu.mcause);
+    printf("%-8s 0x%016lx %12ld  ", "mstatus", cpu.mstatus, cpu.mstatus);
+    printf("%-8s 0x%016lx %12ld  ", "mepc", cpu.mepc, cpu.mepc);
+    printf("%-8s 0x%016lx %12ld\n", "mtvec", cpu.mtvec, cpu.mtvec); 
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {

@@ -34,26 +34,26 @@ bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
 
   // if (ref_r->mtvec != cpu.mtvec) {
   //   printf("csr reg mtvec is wrong\n");
-  //   printf("wrong reg value is 0x%08x\n",cpu.mtvec);
-  //   printf("right reg value is 0x%08x\n",ref_r->mtvec);
+  //   printf("wrong reg value is 0x%08lx\n",cpu.mtvec);
+  //   printf("right reg value is 0x%08lx\n",ref_r->mtvec);
   //   return false;
   // }
   // if (ref_r->mepc != cpu.mepc) {
   //   printf("csr reg mepc is wrong\n");
-  //   printf("wrong reg value is 0x%08x\n",cpu.mepc);
-  //   printf("right reg value is 0x%08x\n",ref_r->mepc);
+  //   printf("wrong reg value is 0x%08lx\n",cpu.mepc);
+  //   printf("right reg value is 0x%08lx\n",ref_r->mepc);
   //   return false;
   // }
   // if (ref_r->mcause != cpu.mcause) {
   //   printf("csr reg mcause is wrong\n");
-  //   printf("wrong reg value is 0x%08x\n",cpu.mcause);
-  //   printf("right reg value is 0x%08x\n",ref_r->mcause);
+  //   printf("wrong reg value is 0x%08lx\n",cpu.mcause);
+  //   printf("right reg value is 0x%08lx\n",ref_r->mcause);
   //   return false;
   // }
   // if (ref_r->mstatus != cpu.mstatus) {
   //   printf("csr reg mstatus is wrong\n");
-  //   printf("wrong reg value is 0x%08x\n",cpu.mstatus);
-  //   printf("right reg value is 0x%08x\n",ref_r->mstatus);
+  //   printf("wrong reg value is 0x%08lx\n",cpu.mstatus);
+  //   printf("right reg value is 0x%08lx\n",ref_r->mstatus);
   //   return false;
   // }
 
