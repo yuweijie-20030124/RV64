@@ -39,7 +39,7 @@ static const char *syscall_names[] = {
   [SYS_gettimeofday] = "gettimeofday",
 };
 
-Context* do_syscall(Context *c) {
+void do_syscall(Context *c) {
   uintptr_t a[4];
   a[0] = c->GPR1;
   a[1] = c->GPR2;
@@ -53,17 +53,23 @@ Context* do_syscall(Context *c) {
   (void)name;
 
   switch (a[0]) {
+
+    case SYS_exit:
+      STRACE_LOG("syscall: %s()", name);  
+
+      c->GPRx = 0;
+      STRACE_LOG("syscall return: %s -> %d", name, c->GPRx);
+    break;
+
     case SYS_yield:
       STRACE_LOG("syscall: %s()", name);
       yield();
       c->GPRx = 0;
       STRACE_LOG("syscall return: %s -> %d", name, c->GPRx);
-      return c;
-    case SYS_exit:
-      STRACE_LOG("syscall: %s(%d)", name, a[1]);
-      halt(a[1]);
-      return c;
-        default:
+      // return c;
+    break;
+
+    default:
       STRACE_LOG("syscall: %s(%d, %p, %p, %p)", name, a[0], a[1], a[2], a[3]);
       panic("Unhandled syscall ID = %d", a[0]);
   }
