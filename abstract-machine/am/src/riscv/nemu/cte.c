@@ -26,16 +26,20 @@ extern void __am_asm_trap(void);
 
 bool cte_init(Context*(*handler)(Event, Context*)) {
   // initialize exception entry
-  asm volatile("csrw mtvec, %0" : : "r"(__am_asm_trap));
+  asm volatile("csrw mtvec, %0" : : "r"(__am_asm_trap));  //把amasmtrap的地址传给mtvec
+  asm volatile("csrw mscratch, zero");
 
-  // register event handler
   user_handler = handler;
 
   return true;
 }
 
 Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
-  return NULL;
+  Context *cp = (Context *)(kstack.end - sizeof(Context));
+  cp->mepc = (uintptr_t)entry;
+  cp->mstatus = 0xa00001800;
+  cp->gpr[10] = (uintptr_t)arg;   //a0传参
+  return cp;
 }
 
 void yield() {
