@@ -1,6 +1,7 @@
 #include <common.h>
 #include "syscall.h"
 
+
 #define CONFIG_STRACE 0
 
 #if CONFIG_STRACE
@@ -52,6 +53,14 @@ void do_syscall(Context *c) {
   (void)name;
 
   switch (a[0]) {
-    default: panic("Unhandled syscall ID = %d", a[0]);
+    case SYS_yield:
+      STRACE_LOG("syscall: %s()", name);
+      yield();
+      c->GPRx = 0;
+      STRACE_LOG("syscall return: %s -> %d", name, c->GPRx);
+      // return c;
+        default:
+      STRACE_LOG("syscall: %s(%d, %p, %p, %p)", name, a[0], a[1], a[2], a[3]);
+      panic("Unhandled syscall ID = %d", a[0]);
   }
 }
