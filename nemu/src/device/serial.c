@@ -15,6 +15,8 @@
 
 #include <utils.h>
 #include <device/map.h>
+#include <poll.h>
+#include <unistd.h>
 
 /* http://en.wikibooks.org/wiki/Serial_Programming/8250_UART_Programming */
 // NOTE: this is compatible to 16550
@@ -34,7 +36,22 @@ static void serial_io_handler(uint32_t offset, int len, bool is_write) {
     /* We bind the serial port with the host stderr in NEMU. */
     case CH_OFFSET:
       if (is_write) serial_putc(serial_base[0]); //如果偏移是0且写操作，那就直接给串口发送一个字节。
-      else panic("do not support read");      //如果读操作就直接报错。
+      else {
+        /* Read one byte from host stdin (non-blocking via poll) */
+        struct pollfd pfd;
+        pfd.fd = STDIN_FILENO;
+        pfd.events = POLLIN;
+        if (poll(&pfd, 1, 0) > 0 && (pfd.revents & POLLIN)) {
+          char ch;
+          if (read(STDIN_FILENO, &ch, 1) == 1) {
+            serial_base[0] = (uint8_t)ch;
+          } else {
+            serial_base[0] = 0xff; /* no data available */
+          }
+        } else {
+          serial_base[0] = 0xff; /* no data available */
+        }
+      }
       break;
     default: panic("do not support offset = %d", offset);
   }
