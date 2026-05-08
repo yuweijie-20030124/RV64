@@ -53,7 +53,6 @@ void do_syscall(Context *c) {
   (void)name;
 
   switch (a[0]) {
-
     case SYS_exit:
       STRACE_LOG("syscall: %s()", name);  
 
