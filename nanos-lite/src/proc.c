@@ -1,6 +1,4 @@
 #include <proc.h>
-#include <elf.h>
-#include <fs.h>
 
 #define MAX_NR_PROC 4
 
@@ -21,26 +19,15 @@ void hello_fun(void *arg) {
   }
 }
 
-extern uintptr_t loader(PCB *pcb, const char *filename);
-
 void init_proc() {
   switch_boot_pcb();
 
   Log("Initializing processes...");
 
-  // load the first user program (dummy)
-  uintptr_t entry = loader(&pcb[0], "/bin/dummy");
-  pcb[0].cp = kcontext((Area){pcb[0].stack, pcb[0].stack + STACK_SIZE}, (void *)entry, NULL);
+  // load program here
+
 }
 
 Context* schedule(Context *prev) {
-  // save the context of the previous process
-  if (prev != NULL) {
-    current->cp = prev;
-  }
-
-  // simple round-robin: always switch to pcb[0]
-  current = &pcb[0];
-
-  return current->cp;
+  return NULL;
 }
