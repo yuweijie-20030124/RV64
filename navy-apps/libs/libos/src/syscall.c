@@ -44,7 +44,8 @@
 #else
 #error _syscall_ is not implemented
 #endif
-
+// SYSCALL  GPR1  GPR2  GPR3  GPR4  GPRx
+// "ecall", "a7", "a0", "a1", "a2", "a0"
 intptr_t _syscall_(intptr_t type, intptr_t a0, intptr_t a1, intptr_t a2) {
   register intptr_t _gpr1 asm (GPR1) = type;
   register intptr_t _gpr2 asm (GPR2) = a0;
