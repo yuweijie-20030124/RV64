@@ -84,6 +84,7 @@ int fs_open(const char *pathname, int flags, int mode) {
 
   int fd = find_file(pathname);
   if (fd >= 0) {
+    printf("****\n");
     file_table[fd].open_offset = 0;
     return fd;
   }

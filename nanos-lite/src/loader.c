@@ -21,7 +21,7 @@
 #define USER_HEAP_GAP (8 * 1024 * 1024)
 
 static uintptr_t loader(PCB *pcb, const char *filename) {
-    printf("****\n");
+    // printf("****\n");
     int fd = fs_open(filename, 0, 0);
     if(fd==-1)
         return -2;
