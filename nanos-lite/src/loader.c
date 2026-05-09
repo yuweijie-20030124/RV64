@@ -20,13 +20,13 @@
 #define USER_HEAP_GAP (8 * 1024 * 1024)
 
 static uintptr_t loader(PCB *pcb, const char *filename) {
-  printf("filename is %c \n",*filename);
+  printf("filename is %c ",*filename);
   int fd = fs_open(filename, 0, 0);
   uint32_t phdr_size = sizeof(Elf_Phdr);
   Elf_Ehdr ehdr;
   Elf_Phdr phdr;
   uintptr_t max_brk = 0;
-  printf("first fs_read\n");
+  printf("\nfirst fs_read\n");
   fs_read(fd, &ehdr, sizeof(Elf_Ehdr));
   // 可以在loader中对魔数进行检查:
   assert(*(uint32_t *)ehdr.e_ident == 0x464c457f);
