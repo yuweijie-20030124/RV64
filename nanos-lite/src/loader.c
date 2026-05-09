@@ -22,7 +22,7 @@
 static uintptr_t loader(PCB *pcb, const char *filename) {
   // printf("filename is %c ",filename);
   int fd = fs_open(filename, 0, 0);
-  assert(fd == -1);
+  assert(fd != -1);
   uint32_t phdr_size = sizeof(Elf_Phdr);
   Elf_Ehdr ehdr; //ELF文件的总体信息
   Elf_Phdr phdr; //Program Header
