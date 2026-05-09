@@ -1,6 +1,7 @@
 #include <proc.h>
 #include <elf.h>
 #include <fs.h>
+
 #ifdef __LP64__
 # define Elf_Ehdr Elf64_Ehdr
 # define Elf_Phdr Elf64_Phdr
@@ -20,39 +21,37 @@
 #define USER_HEAP_GAP (8 * 1024 * 1024)
 
 static uintptr_t loader(PCB *pcb, const char *filename) {
-  // printf("filename is %c ",filename);
-  int fd = fs_open(filename, 0, 0);
-  assert(fd != -1);
-  uint32_t phdr_size = sizeof(Elf_Phdr);
-  Elf_Ehdr ehdr; //ELF文件的总体信息
-  Elf_Phdr phdr; //Program Header
-  uintptr_t max_brk = 0;
-  // printf("\nfirst fs_read\n");
-  fs_read(fd, &ehdr, sizeof(Elf_Ehdr));
-  // 可以在loader中对魔数进行检查:
-  assert(*(uint32_t *)ehdr.e_ident == 0x464c457f); //‘0x7f 'E' 'L' 'F'
-  assert(EXPECT_TYPE == ehdr.e_machine);
-  uint32_t phdr_num = ehdr.e_phnum;
-  for (int i = 0; i < phdr_num; i++) {
-    fs_lseek(fd, ehdr.e_phoff + i * phdr_size, SEEK_SET);
-  // printf("first fs_read\n");
-    fs_read(fd, &phdr, phdr_size);
-    if (phdr.p_type != PT_LOAD) continue;
-    fs_lseek(fd, phdr.p_offset, SEEK_SET);
-  // printf("first fs_read\n");
-    fs_read(fd, (void *)phdr.p_vaddr, phdr.p_filesz);
-    memset((void *)phdr.p_vaddr + phdr.p_filesz, 0, phdr.p_memsz - phdr.p_filesz);
-    uintptr_t brk = phdr.p_vaddr + phdr.p_memsz;
-    if (max_brk < brk) {
-      max_brk = brk;
+    int fd = fs_open(filename, 0, 0);
+    if(fd==-1)
+        return -2;
+    assert(fd > 0);
+    int offset = fs_lseek(fd, 0, SEEK_SET);
+    assert(offset == 0);
+    Elf_Ehdr ehdr;
+    int len = fs_read(fd, &ehdr, sizeof(Elf_Ehdr));
+    assert(len == sizeof(Elf_Ehdr));
+    assert(*(uint32_t *)ehdr.e_ident == 0x464c457f);
+    for (int i = 0; i < ehdr.e_phnum;i++){
+        Elf_Phdr phdr;
+        offset = fs_lseek(fd, ehdr.e_phoff + (i * ehdr.e_phentsize), SEEK_SET);
+        assert(offset == (ehdr.e_phoff + (i * ehdr.e_phentsize)));
+        // len = ramdisk_read(&phdr, ehdr.e_phoff + (i * ehdr.e_phentsize), sizeof(Elf_Phdr));
+        len = fs_read(fd, &phdr, sizeof(Elf_Phdr));
+        assert(len == sizeof(Elf_Phdr));
+        if(phdr.p_type==PT_LOAD){
+            offset = fs_lseek(fd, phdr.p_offset, SEEK_SET);
+            assert(offset == phdr.p_offset);
+            len = fs_read(fd, (void *)(phdr.p_vaddr), phdr.p_memsz);
+            // len = ramdisk_read((void *)(phdr.p_vaddr), phdr.p_offset, phdr.p_memsz);
+            // assert(len == phdr.p_memsz);
+            memset((void *)(phdr.p_vaddr + phdr.p_filesz), 0, phdr.p_memsz - phdr.p_filesz);
+        }
     }
-  }
-  fs_close(fd);
-  if (pcb != NULL) {
-    pcb->max_brk = ROUNDUP(max_brk, PGSIZE);
-  }
-  return ehdr.e_entry;
+    //   TODO();
+    return ehdr.e_entry;
 }
+
+
 
 void naive_uload(PCB *pcb, const char *filename) {
   uintptr_t entry = loader(pcb, filename);
