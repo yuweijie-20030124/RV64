@@ -27,7 +27,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
   uintptr_t max_brk = 0;
   fs_read(fd, &ehdr, sizeof(Elf_Ehdr));
   // 可以在loader中对魔数进行检查:
-  assert(*(uint32_t *)ehdr.e_ident == 0x164c457f);
+  assert(*(uint32_t *)ehdr.e_ident == 0x464c457f);
   assert(EXPECT_TYPE == ehdr.e_machine);
   uint32_t phdr_num = ehdr.e_phnum;
   for (int i = 0; i < phdr_num; i++) {
