@@ -82,7 +82,7 @@ int fs_open(const char *pathname, int flags, int mode) {
   (void)flags;
   (void)mode;
   printf("*********");
-  printf("pathname is %c\n",*pathname);
+  // printf("pathname is %c\n",*pathname);
   printf("*********!!`\n");
   
   int fd = find_file(pathname);
