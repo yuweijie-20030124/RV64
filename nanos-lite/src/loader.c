@@ -25,6 +25,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
   Elf_Ehdr ehdr;
   Elf_Phdr phdr;
   uintptr_t max_brk = 0;
+  printf("first fs_read\n");
   fs_read(fd, &ehdr, sizeof(Elf_Ehdr));
   // 可以在loader中对魔数进行检查:
   assert(*(uint32_t *)ehdr.e_ident == 0x464c457f);
@@ -32,9 +33,11 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
   uint32_t phdr_num = ehdr.e_phnum;
   for (int i = 0; i < phdr_num; i++) {
     fs_lseek(fd, ehdr.e_phoff + i * phdr_size, SEEK_SET);
+  printf("first fs_read\n");
     fs_read(fd, &phdr, phdr_size);
     if (phdr.p_type != PT_LOAD) continue;
     fs_lseek(fd, phdr.p_offset, SEEK_SET);
+  printf("first fs_read\n");
     fs_read(fd, (void *)phdr.p_vaddr, phdr.p_filesz);
     memset((void *)phdr.p_vaddr + phdr.p_filesz, 0, phdr.p_memsz - phdr.p_filesz);
     uintptr_t brk = phdr.p_vaddr + phdr.p_memsz;
