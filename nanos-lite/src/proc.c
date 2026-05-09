@@ -6,6 +6,8 @@ static PCB pcb[MAX_NR_PROC] __attribute__((used)) = {};
 static PCB pcb_boot = {};
 PCB *current = NULL;
 
+void naive_uload();
+
 
 void switch_boot_pcb() {
   current = &pcb_boot;
@@ -27,6 +29,7 @@ void init_proc() {
 
   // load program here
   // naive_uload(NULL, NULL);
+  naive_uload();
 }
 
 Context* schedule(Context *prev) {
