@@ -81,8 +81,10 @@ static int find_file(const char *pathname) {
 int fs_open(const char *pathname, int flags, int mode) {
   (void)flags;
   (void)mode;
-  printf("*********`");
-  printf("pathname is %c",*pathname);
+  printf("*********");
+  printf("pathname is %c\n",*pathname);
+  printf("*********\n");
+  
   int fd = find_file(pathname);
   if (fd >= 0) {
     printf("****\n");
