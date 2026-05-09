@@ -20,7 +20,7 @@
 #define USER_HEAP_GAP (8 * 1024 * 1024)
 
 static uintptr_t loader(PCB *pcb, const char *filename) {
-  printf("filename is %c ",*filename);
+  printf("filename is %c ",filename);
   int fd = fs_open(filename, 0, 0);
   uint32_t phdr_size = sizeof(Elf_Phdr);
   Elf_Ehdr ehdr;
