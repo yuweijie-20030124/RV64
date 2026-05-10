@@ -282,6 +282,9 @@ static int decode_exec(Decode *s) {
   INSTPAT("0000000 ????? ????? 110 ????? 01100 11", or     , R, R(rd) = src1 | src2); 
   INSTPAT("0000000 ????? ????? 111 ????? 01100 11", and    , R, R(rd) = src1 & src2); 
   INSTPAT("0100000 ????? ????? 101 ????? 01100 11", sra    , R, R(rd) = (sword_t)src1 >> (src2 & SHAMT_MASK)); 
+  
+  //MAGIC STOP
+  INSTPAT("0100000 00000 00000 000 00000 01100 11", sub    , R, magic_instruction()); 
 
   INSTPAT("0100000 ????? ????? 000 ????? 01100 11", sub    , R, R(rd) = src1 - src2); 
   INSTPAT("0000000 ????? ????? 000 ????? 01110 11", addw   , R, R(rd) = SEXT(src1 + src2, 32));
@@ -365,8 +368,6 @@ static int decode_exec(Decode *s) {
   INSTPAT("0100100 ????? ????? 001 ????? 00100 11", bclri  , I, R(rd) = src1 & ~((uint32_t)1 << BITS(imm, 4, 0)););
   INSTPAT("0010100 ????? ????? 001 ????? 00100 11", bseti  , I, R(rd) = src1 |  ((uint32_t)1 << BITS(imm, 4, 0)););
   INSTPAT("0110100 ????? ????? 001 ????? 00100 11", binvi  , I, R(rd) = src1 ^  ((uint32_t)1 << BITS(imm, 4, 0)););
-
-  INSTPAT("0100000 00000 00000 000 00000 01100 11", sub    , R, magic_instruction()); 
 
   INSTPAT("0011000 00010 00000 000 0000 011100 11", mret   , R, s->dnpc = cpu.mepc);
   //div注释：
