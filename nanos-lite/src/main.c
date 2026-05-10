@@ -8,7 +8,7 @@ void init_fs(void);
 void init_proc(void);
 
 int main() {
-  NEMU_STOP_ASM();
+  // NEMU_STOP_ASM();
   extern const char logo[];
   printf("%s", logo);
   // NEMU_STOP_ASM();
