@@ -66,6 +66,9 @@ Context *do_syscall(Context *c) {
       return c;
     break;
 
+    case SYS_write:
+      STRACE_LOG("syscall: %s()", name);
+      return c;
     default:
       STRACE_LOG("syscall: %s(%d, %p, %p, %p)", name, a[0], a[1], a[2], a[3]);
       panic("Unhandled syscall ID = %d", a[0]);
