@@ -22,6 +22,7 @@ int main() {
 #ifdef HAS_CTE
   init_irq();
 #endif
+  NEMU_STOP_ASM();
 
   init_fs(); // 初始化文件系统
 
@@ -32,6 +33,6 @@ int main() {
 #ifdef HAS_CTE
   yield();
 #endif
-
+  
   panic("Should not reach here");
 }
