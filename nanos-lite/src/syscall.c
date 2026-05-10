@@ -1,6 +1,6 @@
 #include <common.h>
 #include "syscall.h"
-
+#include "fs.h"
 
 #define CONFIG_STRACE 1
 
@@ -67,8 +67,11 @@ Context *do_syscall(Context *c) {
     break;
 
     case SYS_write:
-      STRACE_LOG("syscall: %s()", name);
+      STRACE_LOG("syscall: %s(%d:%s, %p, %d)", name, a[1], STRACE_FD(a[1]), a[2], a[3]);
+      c->GPRx = fs_write(a[1], (const void *)a[2], a[3]);
+      STRACE_LOG("syscall return: %s -> %d", name, c->GPRx);
       return c;
+
     default:
       STRACE_LOG("syscall: %s(%d, %p, %p, %p)", name, a[0], a[1], a[2], a[3]);
       panic("Unhandled syscall ID = %d", a[0]);
