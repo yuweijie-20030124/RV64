@@ -2,7 +2,7 @@
 #include "syscall.h"
 
 
-#define CONFIG_STRACE 0
+#define CONFIG_STRACE 1
 
 #if CONFIG_STRACE
 #define STRACE_LOG(...) Log(__VA_ARGS__)
