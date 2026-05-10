@@ -22,6 +22,7 @@
 
 static uintptr_t loader(PCB *pcb, const char *filename) {
     // printf("****\n");
+    //目前文件都传不进来
     int fd = fs_open(filename, 0, 0);
     if(fd==-1)
         return -2;
