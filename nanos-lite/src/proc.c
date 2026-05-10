@@ -33,9 +33,6 @@ void init_proc() {
 }
 
 Context* schedule(Context *prev) {
-  if (current != &pcb_boot) {
-    current->cp = prev;
-  }
-
+  current->cp = prev;
   return current->cp;
 }
