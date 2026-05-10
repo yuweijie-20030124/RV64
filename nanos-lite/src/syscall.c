@@ -55,10 +55,7 @@ Context *do_syscall(Context *c) {
   switch (a[0]) {
     case SYS_exit:
       STRACE_LOG("syscall: %s()", name);  
-
-      c->GPRx = 0;
-      STRACE_LOG("syscall return: %s -> %d", name, c->GPRx);
-      return c;
+      halt(0);
     break;
 
     case SYS_yield:
