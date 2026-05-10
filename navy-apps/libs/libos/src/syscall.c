@@ -72,11 +72,15 @@ int _write(int fd, void *buf, size_t count) {
 
 void *_sbrk(intptr_t increment) {
   extern char _end;  // defined by linker, end of BSS
-  static char *heap_end = NULL;
-  if (heap_end == NULL) heap_end = &_end;
-  char *prev = heap_end;
-  heap_end += increment;
-  return prev;
+  static intptr_t brk = 0;
+  if (brk == 0) brk = (intptr_t)&_end;
+  intptr_t new_brk = brk + increment;
+  if (_syscall_(SYS_brk, new_brk, 0, 0) == 0) {
+    intptr_t prev = brk;
+    brk = new_brk;
+    return (void *)prev;
+  }
+  return (void *)-1;
 }
 
 int _read(int fd, void *buf, size_t count) {

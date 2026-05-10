@@ -1,6 +1,7 @@
 #include <common.h>
 #include "syscall.h"
 #include "fs.h"
+#include <memory.h>
 
 #define CONFIG_STRACE 1
 
@@ -69,6 +70,12 @@ Context *do_syscall(Context *c) {
     case SYS_write:
       STRACE_LOG("syscall: %s(%d:%s, %p, %d)", name, a[1], STRACE_FD(a[1]), a[2], a[3]);
       c->GPRx = fs_write(a[1], (const void *)a[2], a[3]);
+      STRACE_LOG("syscall return: %s -> %d", name, c->GPRx);
+      return c;
+
+    case SYS_brk:
+      STRACE_LOG("syscall: %s(%p)", name, a[1]);
+      c->GPRx = mm_brk(a[1]);
       STRACE_LOG("syscall return: %s -> %d", name, c->GPRx);
       return c;
 
