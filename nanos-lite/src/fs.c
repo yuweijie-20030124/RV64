@@ -81,13 +81,9 @@ static int find_file(const char *pathname) {
 int fs_open(const char *pathname, int flags, int mode) {
   (void)flags;
   (void)mode;
-  printf("*********");
-  printf("pathname is %c\n",pathname);
-  printf("*********!!`\n");
   
   int fd = find_file(pathname);
   if (fd >= 0) {
-    printf("****\n");
     file_table[fd].open_offset = 0;
     return fd;
   }
@@ -96,7 +92,6 @@ int fs_open(const char *pathname, int flags, int mode) {
 }
 
 size_t fs_read(int fd, void *buf, size_t len) {
-  printf("fd = %d\n",fd);
   assert(fd >= 0 && fd < (int)LENGTH(file_table));
   Finfo *file = &file_table[fd];
   size_t ret = 0;

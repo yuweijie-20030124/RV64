@@ -27,7 +27,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
     if(fd==-1)
         return -2;
     assert(fd > 0);
-    printf("filename is %c\n",*filename);
+    // printf("filename is %c\n",*filename);
     int offset = fs_lseek(fd, 0, SEEK_SET);
     assert(offset == 0);
     Elf_Ehdr ehdr;
