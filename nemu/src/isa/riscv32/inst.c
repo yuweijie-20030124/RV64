@@ -368,7 +368,15 @@ static int decode_exec(Decode *s) {
 
   INSTPAT("0100000 00000 00000 000 00000 01100 11", sub    , R, magic_instruction()); 
 
-  INSTPAT("0011000 00010 00000 000 0000 011100 11", mret   , R, s->dnpc = cpu.mepc);
+  INSTPAT("0011000 00010 00000 000 0000 011100 11", mret   , R, {
+    // mstatus.MIE = mstatus.MPIE; mstatus.MPIE = 1; mstatus.MPP = 0 (User)
+    word_t mstatus = cpu.mstatus;
+    mstatus = (mstatus & ~0x8) | ((mstatus & 0x80) >> 4);  // MIE = MPIE
+    mstatus |= 0x80;             // MPIE = 1
+    mstatus &= ~(3 << 11);       // MPP = 0 (User mode)
+    cpu.mstatus = mstatus;
+    s->dnpc = cpu.mepc;
+  });
   //div注释：
   //匹配 div 指令（有符号除法）。
   //如果除数 src2 为 0，结果规定为 -1。

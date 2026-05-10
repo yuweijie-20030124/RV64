@@ -19,8 +19,13 @@ word_t isa_raise_intr(word_t NO, vaddr_t epc) {
   /* TODO: Trigger an interrupt/exception with ``NO''. 待办事项：使用“NO”触发中断/异常。
    * Then return the address of the interrupt/exception vector. 然后返回中断/异常向量的地址
    */
-  // cpu.mstatus = 0xa00021800; 
-  cpu.mstatus = 0xa00021800; 
+  // mstatus.MPIE = mstatus.MIE;  mstatus.MIE = 0;  mstatus.MPP = 3 (Machine)
+  word_t mstatus = cpu.mstatus;
+  mstatus = (mstatus & ~0x80) | ((mstatus & 0x8) << 4);  // MPIE = MIE
+  mstatus &= ~0x8;       // MIE = 0
+  mstatus |= (3 << 11);  // MPP = 3 (Machine mode)
+  cpu.mstatus = mstatus;
+
   cpu.mepc = epc; 
   cpu.mcause = NO;
   return cpu.mtvec;
