@@ -39,7 +39,7 @@ static const char *syscall_names[] = {
   [SYS_gettimeofday] = "gettimeofday",
 };
 
-void do_syscall(Context *c) {
+Context *do_syscall(Context *c) {
   uintptr_t a[4];
   a[0] = c->GPR1;
   a[1] = c->GPR2;
@@ -72,4 +72,6 @@ void do_syscall(Context *c) {
       STRACE_LOG("syscall: %s(%d, %p, %p, %p)", name, a[0], a[1], a[2], a[3]);
       panic("Unhandled syscall ID = %d", a[0]);
   }
+
+  return c;
 }
