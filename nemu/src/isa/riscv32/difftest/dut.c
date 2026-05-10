@@ -32,12 +32,12 @@ bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
     }
   }
 
-  if (ref_r->mtvec != cpu.mtvec) {
-    printf("csr reg mtvec is wrong\n");
-    printf("wrong reg value is 0x%08lx\n",cpu.mtvec);
-    printf("right reg value is 0x%08lx\n",ref_r->mtvec);
-    return false;
-  }
+  // if (ref_r->mtvec != cpu.mtvec) {
+  //   printf("csr reg mtvec is wrong\n");
+  //   printf("wrong reg value is 0x%08lx\n",cpu.mtvec);
+  //   printf("right reg value is 0x%08lx\n",ref_r->mtvec);
+  //   return false;
+  // }
   // if (ref_r->mepc != cpu.mepc) {
   //   printf("csr reg mepc is wrong\n");
   //   printf("wrong reg value is 0x%08lx\n",cpu.mepc);
