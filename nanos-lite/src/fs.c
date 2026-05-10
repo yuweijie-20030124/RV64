@@ -1,5 +1,6 @@
 #include <fs.h>
 
+//读写函数指针
 typedef size_t (*ReadFn) (void *buf, size_t offset, size_t len);
 typedef size_t (*WriteFn) (const void *buf, size_t offset, size_t len);
 
@@ -80,7 +81,7 @@ static int find_file(const char *pathname) {
 int fs_open(const char *pathname, int flags, int mode) {
   (void)flags;
   (void)mode;
-
+  
   int fd = find_file(pathname);
   if (fd >= 0) {
     file_table[fd].open_offset = 0;

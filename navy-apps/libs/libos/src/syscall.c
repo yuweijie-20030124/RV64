@@ -44,7 +44,8 @@
 #else
 #error _syscall_ is not implemented
 #endif
-
+// SYSCALL  GPR1  GPR2  GPR3  GPR4  GPRx
+// "ecall", "a7", "a0", "a1", "a2", "a0"
 intptr_t _syscall_(intptr_t type, intptr_t a0, intptr_t a1, intptr_t a2) {
   register intptr_t _gpr1 asm (GPR1) = type;
   register intptr_t _gpr2 asm (GPR2) = a0;
@@ -66,11 +67,19 @@ int _open(const char *path, int flags, mode_t mode) {
 }
 
 int _write(int fd, void *buf, size_t count) {
-  _exit(SYS_write);
-  return 0;
+  return _syscall_(SYS_write, fd, (intptr_t)buf, count);
 }
 
 void *_sbrk(intptr_t increment) {
+  extern char _end;  // defined by linker, end of BSS
+  static intptr_t brk = 0;
+  if (brk == 0) brk = (intptr_t)&_end;
+  intptr_t new_brk = brk + increment;
+  if (_syscall_(SYS_brk, new_brk, 0, 0) == 0) {
+    intptr_t prev = brk;
+    brk = new_brk;
+    return (void *)prev;
+  }
   return (void *)-1;
 }
 

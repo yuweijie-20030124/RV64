@@ -18,4 +18,8 @@ typedef union {
 
 extern PCB *current;
 
+Context* schedule(Context *prev);
+
+// int naive_uload(PCB *pcb, const char *filename);
+
 #endif

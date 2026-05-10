@@ -8,8 +8,10 @@ void init_fs(void);
 void init_proc(void);
 
 int main() {
+  NEMU_STOP_ASM;
   extern const char logo[];
   printf("%s", logo);
+  // NEMU_STOP_ASM();
   Log("'Hello World!' from Nanos-lite");
   Log("Build time: %s, %s", __TIME__, __DATE__);
 
@@ -22,16 +24,17 @@ int main() {
 #ifdef HAS_CTE
   init_irq();
 #endif
+  // NEMU_STOP_ASM();
 
-  init_fs();
+  init_fs(); // 初始化文件系统
 
-  init_proc();
+  init_proc(); // 创建进程
 
-  Log("Finish initialization");
+  Log("Finish initialization"); 
 
 #ifdef HAS_CTE
   yield();
 #endif
-
+  
   panic("Should not reach here");
 }

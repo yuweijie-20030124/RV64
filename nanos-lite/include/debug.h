@@ -27,4 +27,7 @@
 
 #define TODO() panic("please implement me")
 
+//nemu 魔法暂停
+#define NEMU_STOP_ASM __asm__ volatile ("sub x0, x0, x0")
+
 #endif
