@@ -65,7 +65,7 @@ Context *do_syscall(Context *c) {
       yield();
       c->GPRx = 0;
       STRACE_LOG("syscall return: %s -> %d", name, c->GPRx);
-      // return c;
+      return c;
     break;
 
     default:
