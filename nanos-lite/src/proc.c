@@ -10,7 +10,7 @@ void naive_uload();
 
 
 void switch_boot_pcb() {
-  current = &pcb_boot;
+  current = &pcb_boot; //里面是空的，但是注册了32kb的栈，运行内核的时候栈帧就落在这篇内存上。
 }
 
 void hello_fun(void *arg) {
@@ -23,7 +23,7 @@ void hello_fun(void *arg) {
 }
 
 void init_proc() {
-  switch_boot_pcb();
+  switch_boot_pcb(); //用于启动的虚假进程
 
   Log("Initializing processes...");
 

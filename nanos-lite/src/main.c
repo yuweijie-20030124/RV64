@@ -8,10 +8,9 @@ void init_fs(void);
 void init_proc(void);
 
 int main() {
-  NEMU_STOP_ASM;
+  // NEMU_STOP_ASM;
   extern const char logo[];
   printf("%s", logo);
-  // NEMU_STOP_ASM();
   Log("'Hello World!' from Nanos-lite");
   Log("Build time: %s, %s", __TIME__, __DATE__);
 
@@ -28,7 +27,7 @@ int main() {
 
   init_fs(); // 初始化文件系统
 
-  init_proc(); // 创建进程
+  init_proc(); // 加载并启动用户程序
 
   Log("Finish initialization"); 
 

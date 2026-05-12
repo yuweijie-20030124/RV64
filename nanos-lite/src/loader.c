@@ -21,8 +21,6 @@
 #define USER_HEAP_GAP (8 * 1024 * 1024)
 
 static uintptr_t loader(PCB *pcb, const char *filename) {
-    // printf("****\n");
-    //目前文件都传不进来
     int fd = fs_open(filename, 0, 0);
     if(fd==-1)
         return -2;
@@ -36,15 +34,16 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
     assert(*(uint32_t *)ehdr.e_ident == 0x464c457f);
     for (int i = 0; i < ehdr.e_phnum;i++){
         Elf_Phdr phdr;
+        //遍历 ELF 文件的 Program Header Table（程序头表）
         offset = fs_lseek(fd, ehdr.e_phoff + (i * ehdr.e_phentsize), SEEK_SET);
         assert(offset == (ehdr.e_phoff + (i * ehdr.e_phentsize)));
         // len = ramdisk_read(&phdr, ehdr.e_phoff + (i * ehdr.e_phentsize), sizeof(Elf_Phdr));
         len = fs_read(fd, &phdr, sizeof(Elf_Phdr));
         assert(len == sizeof(Elf_Phdr));
-        if(phdr.p_type==PT_LOAD){
+        if(phdr.p_type==PT_LOAD){ //如果要加载到内存中
             offset = fs_lseek(fd, phdr.p_offset, SEEK_SET);
             assert(offset == phdr.p_offset);
-            len = fs_read(fd, (void *)(phdr.p_vaddr), phdr.p_memsz);
+            // len = fs_read(fd, (void *)(phdr.p_vaddr), phdr.p_memsz);
             // len = ramdisk_read((void *)(phdr.p_vaddr), phdr.p_offset, phdr.p_memsz);
             // assert(len == phdr.p_memsz);
             memset((void *)(phdr.p_vaddr + phdr.p_filesz), 0, phdr.p_memsz - phdr.p_filesz);
