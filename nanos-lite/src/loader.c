@@ -43,7 +43,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
         if(phdr.p_type==PT_LOAD){ //如果要加载到内存中
             offset = fs_lseek(fd, phdr.p_offset, SEEK_SET);
             assert(offset == phdr.p_offset);
-            // len = fs_read(fd, (void *)(phdr.p_vaddr), phdr.p_memsz);
+            len = fs_read(fd, (void *)(phdr.p_vaddr), phdr.p_memsz);
             // len = ramdisk_read((void *)(phdr.p_vaddr), phdr.p_offset, phdr.p_memsz);
             // assert(len == phdr.p_memsz);
             memset((void *)(phdr.p_vaddr + phdr.p_filesz), 0, phdr.p_memsz - phdr.p_filesz);
