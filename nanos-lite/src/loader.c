@@ -34,7 +34,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
     //检查魔术头
     assert(*(uint32_t *)ehdr.e_ident == 0x464c457f);
     assert(ehdr.e_machine == EM_RISCV);
-    printf("type is %d\n",ehdr.e_type);
+    assert(ehdr.e_type == ET_EXEC);
     for (int i = 0; i < ehdr.e_phnum;i++){
         Elf_Phdr phdr;
         //遍历 ELF 文件的 Program Header Table（程序头表）
