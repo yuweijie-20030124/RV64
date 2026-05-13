@@ -31,7 +31,9 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
     Elf_Ehdr ehdr;
     int len = fs_read(fd, &ehdr, sizeof(Elf_Ehdr));
     assert(len == sizeof(Elf_Ehdr));
+    //检查魔术头
     assert(*(uint32_t *)ehdr.e_ident == 0x464c457f);
+    assert(ehdr.e_machine == EM_RISCV);
     for (int i = 0; i < ehdr.e_phnum;i++){
         Elf_Phdr phdr;
         //遍历 ELF 文件的 Program Header Table（程序头表）
@@ -46,6 +48,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
             len = fs_read(fd, (void *)(phdr.p_vaddr), phdr.p_memsz);
             // len = ramdisk_read((void *)(phdr.p_vaddr), phdr.p_offset, phdr.p_memsz);
             // assert(len == phdr.p_memsz);
+            // memset清空.bss段——ELF 文件加载的标准操作。
             memset((void *)(phdr.p_vaddr + phdr.p_filesz), 0, phdr.p_memsz - phdr.p_filesz);
         }
     }

@@ -68,7 +68,10 @@ static Finfo file_table[] __attribute__((used)) = {
 static size_t file_size(int fd) {
   return file_table[fd].size;
 }
-
+//防止读越界，如果请求读的字节数超出了文件剩余内容，就自动截断。
+  // offset = 文件内部偏移
+  // len    = 读的字节数
+  // size   = 文件总大小
 static size_t clamp_len(size_t offset, size_t len, size_t size) {
   if (offset >= size) {
     return 0;
@@ -106,7 +109,7 @@ size_t fs_read(int fd, void *buf, size_t len) {
 
   if (file->read != NULL) {
     ret = file->read(buf, file->open_offset, len);
-  } else {
+  } else { //bin文件会进入这里
     ret = clamp_len(file->open_offset, len, file->size);
     ret = ramdisk_read(buf, file->disk_offset + file->open_offset, ret);
   }
