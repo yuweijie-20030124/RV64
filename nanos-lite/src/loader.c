@@ -28,13 +28,13 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
     // printf("filename is %c\n",*filename);
     int offset = fs_lseek(fd, 0, SEEK_SET);
     assert(offset == 0);
-    Elf_Ehdr ehdr;
+    Elf_Ehdr ehdr;  //ELF文件的文件头
     int len = fs_read(fd, &ehdr, sizeof(Elf_Ehdr));
     assert(len == sizeof(Elf_Ehdr));
-    //检查魔术头
+    //检查魔术头 7f E L F
     assert(*(uint32_t *)ehdr.e_ident == 0x464c457f);
-    assert(ehdr.e_machine == EM_RISCV);
-    assert(ehdr.e_type == ET_EXEC);
+    assert(ehdr.e_type == ET_EXEC); //文件类型是可执行文件
+    assert(ehdr.e_machine == EM_RISCV);//architect是riscv的
     for (int i = 0; i < ehdr.e_phnum;i++){
         Elf_Phdr phdr;
         //遍历 ELF 文件的 Program Header Table（程序头表）
