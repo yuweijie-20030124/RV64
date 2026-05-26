@@ -23,7 +23,7 @@ extern const char *regs[];
 
 bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
   int reg_num = (int)(sizeof(cpu.gpr) / sizeof(cpu.gpr[0]));
-  if(ref_r->mcause != cpu.mcause){
+  if(ref_r->mcause == cpu.mcause){
       printf("mcause is wrong\n");
       return false;
   }
