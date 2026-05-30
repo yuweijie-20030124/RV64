@@ -1,6 +1,9 @@
-#include <stdio.h>
+#include <stdlib.h>
+#include <iostream>
+#include <cstdlib>
+#include <common.h>
+#include "svdpi.h"
 
 int main() {
-  printf("Hello, ysyx!\n");
   return 0;
 }
