@@ -5,7 +5,9 @@ SONPC_HOME := $(NPC_HOME)
 
 .DEFAULT_GOAL := sim
 
+ifeq ($(ENABLE_GIT_COMMIT),1)
 -include $(YSYX_HOME)/Makefile
+endif
 include $(NPC_HOME)/scripts/config.mk
 
 -include $(NPC_HOME)/include/config/auto.conf
@@ -23,6 +25,10 @@ CXX_SRCS_ALL := $(shell find $(NPC_HOME)/csrc -type f \( -name "*.c" -o -name "*
 # The local LLVM headers are not guaranteed to exist. Keep the interface alive
 # with a tiny stub; real instruction tracing can be restored by compiling disasm.cc.
 CXX_SRCS := $(filter-out $(NPC_HOME)/csrc/utils/disasm.cc,$(CXX_SRCS_ALL))
+
+define npc_git_commit
+$(if $(ENABLE_GIT_COMMIT),$(call git_commit,$(1)),@true)
+endef
 
 CORE_VSRCS := $(wildcard $(NPC_HOME)/vsrc/core/*.v) \
               $(wildcard $(NPC_HOME)/vsrc/core/utils/*.v)
@@ -81,7 +87,7 @@ NPC_FLAGS ?= --log=$(NPC_LOG) --diff=$(NEMU_SO) -b
 
 sim:
 	$(VERILATOR) $(VERILATOR_FLAGS) $(CXX_SRCS) $(VSRCS)
-	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
+	$(call npc_git_commit, "sim RTL")
 
 run: sim nemu-so
 	$(NPC_BIN) $(NPC_FLAGS) $(NPC_IMG)
