@@ -1,8 +1,9 @@
 include $(AM_HOME)/scripts/isa/riscv.mk
-include $(AM_HOME)/scripts/platform/nemu.mk
-CFLAGS  += -DISA_H=\"riscv/riscv.h\"
+include $(AM_HOME)/scripts/platform/npc.mk
 
-AM_SRCS += riscv/nemu/start.S \
-           riscv/nemu/cte.c \
-           riscv/nemu/trap.S \
-           riscv/nemu/vme.c
+CROSS_COMPILE := riscv64-unknown-elf-
+COMMON_CFLAGS := -fno-pic -march=rv64ima_zicsr -mabi=lp64 -mcmodel=medany -mstrict-align
+
+CFLAGS  += $(COMMON_CFLAGS) -DISA_H=\"riscv/riscv.h\"
+ASFLAGS += $(COMMON_CFLAGS)
+LDFLAGS += -melf64lriscv

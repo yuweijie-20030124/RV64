@@ -7,6 +7,14 @@
 !*.v
 !*.cc
 !*.cpp
+!Kconfig
+!*_defconfig
 !.gitignore
 !README.md
+/obj_dir/
+/waveform.vcd
+/include/config
+/include/generated
+/.config
+/.config.old
 build/
