@@ -77,7 +77,7 @@ VERILATOR_FLAGS := -Wno-fatal \
 NPC_IMG ?=
 NPC_FLAGS ?= --log=$(NPC_LOG) --diff=$(NEMU_SO) -b
 
-.PHONY: sim run gdb clean nemu-so help
+.PHONY: sim run gdb clean nemu-so
 
 sim:
 	$(VERILATOR) $(VERILATOR_FLAGS) $(CXX_SRCS) $(VSRCS)
@@ -94,8 +94,3 @@ nemu-so:
 
 clean:
 	rm -rf $(NPC_HOME)/obj_dir $(NPC_HOME)/npc-log.txt
-
-help:
-	@echo "make sim                  Build $(TOP_MODULE)"
-	@echo "make run NPC_IMG=<bin>    Build and run with current csrc monitor"
-	@echo "make clean                Remove generated Verilator output"
