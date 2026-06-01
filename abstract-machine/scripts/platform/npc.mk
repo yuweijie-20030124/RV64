@@ -9,6 +9,7 @@ AM_SRCS := riscv/npc/start.S \
            platform/dummy/mpe.c
 
 NPC_HOME ?= $(abspath $(AM_HOME)/../npc)
+NEMU_HOME ?= $(abspath $(AM_HOME)/../nemu)
 
 CFLAGS    += -g -fdata-sections -ffunction-sections
 LDSCRIPTS += $(AM_HOME)/scripts/linker.ld
@@ -16,7 +17,7 @@ LDFLAGS   += --defsym=_pmem_start=0x80000000 --defsym=_entry_offset=0x0
 LDFLAGS   += --gc-sections -e _start
 NPCFLAGS  += -l $(shell dirname $(IMAGE).elf)/npc-log.txt
 NPCFLAGS  += -b
-NPCFLAGS  += -d --diff=$(RV64_NEMU_HOME)/build/riscv32-nemu-interpreter-so
+NPCFLAGS  += -d --diff=$(NEMU_HOME)/build/riscv64-nemu-interpreter-so
 
 MAINARGS_MAX_LEN = 64
 MAINARGS_PLACEHOLDER = the_insert-arg_rule_in_Makefile_will_insert_mainargs_here
