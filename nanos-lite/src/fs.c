@@ -5,21 +5,21 @@ typedef size_t (*ReadFn) (void *buf, size_t offset, size_t len);
 typedef size_t (*WriteFn) (const void *buf, size_t offset, size_t len);
 
 typedef struct {
-  char *name;
-  size_t size;
-  size_t disk_offset;
-  size_t open_offset;
-  ReadFn read;
-  WriteFn write;
+  char *name;         // 文件名（如 "/dev/fb"）
+  size_t size;        // 文件大小（字节）
+  size_t disk_offset; // 在 ramdisk 中的起始偏移
+  size_t open_offset; // 当前读写位置
+  ReadFn read;        // 自定义读函数指针
+  WriteFn write;      // 自定义写函数指针
 } Finfo;
 
 enum {
-  FD_STDIN,
-  FD_STDOUT,
-  FD_STDERR,
-  FD_EVENTS,
-  FD_DISPINFO,
-  FD_FB,
+  FD_STDIN,     // = 0  标准输入
+  FD_STDOUT,    // = 1  标准输出
+  FD_STDERR,    // = 2  标准错误
+  FD_EVENTS,    // = 3  事件设备（键盘输入事件）
+  FD_DISPINFO,  // = 4  显示信息（屏幕分辨率等）
+  FD_FB,        // = 5  帧缓冲（显存）
 };
 
 size_t serial_write(const void *buf, size_t offset, size_t len);
@@ -46,6 +46,9 @@ size_t stdin_read(void *buf, size_t offset, size_t len) {
   return 0;
 }
 
+///dev/events 不是一个真实的磁盘文件，而是一个虚拟设备文件（device file），类似 Linux 的 /dev/input/events。
+
+// 不理解qaq
 /* This is the information about all files in disk. */
 static Finfo file_table[] __attribute__((used)) = {
   [FD_STDIN]    = {"stdin", 0, 0, 0, stdin_read, invalid_write},
@@ -56,11 +59,19 @@ static Finfo file_table[] __attribute__((used)) = {
   [FD_FB]       = {"/dev/fb", 0, 0, 0, invalid_read, fb_write},
 #include "files.h"
 };
+// 如果不用指定初始化器，编译器自动分配下一个连续下标
+// 如果后面没写
+// open_offset 自动 = 0
+// read        自动 = NULL
+// write       自动 = NULL
 
 static size_t file_size(int fd) {
   return file_table[fd].size;
 }
-
+//防止读越界，如果请求读的字节数超出了文件剩余内容，就自动截断。
+  // offset = 文件内部偏移
+  // len    = 读的字节数
+  // size   = 文件总大小
 static size_t clamp_len(size_t offset, size_t len, size_t size) {
   if (offset >= size) {
     return 0;
@@ -98,7 +109,7 @@ size_t fs_read(int fd, void *buf, size_t len) {
 
   if (file->read != NULL) {
     ret = file->read(buf, file->open_offset, len);
-  } else {
+  } else { //bin文件会进入这里
     ret = clamp_len(file->open_offset, len, file->size);
     ret = ramdisk_read(buf, file->disk_offset + file->open_offset, ret);
   }
@@ -108,7 +119,7 @@ size_t fs_read(int fd, void *buf, size_t len) {
 }
 
 size_t fs_write(int fd, const void *buf, size_t len) {
-  assert(fd >= 0 && fd < (int)LENGTH(file_table));
+  assert(fd >= 0 && fd < (int)LENGTH(file_table)); //遍历大于0且不超出范围
   Finfo *file = &file_table[fd];
   size_t ret = 0;
 
@@ -129,9 +140,9 @@ size_t fs_lseek(int fd, size_t offset, int whence) {
   size_t new_offset = 0;
 
   switch (whence) {
-    case SEEK_SET: new_offset = offset; break;
-    case SEEK_CUR: new_offset = file->open_offset + offset; break;
-    case SEEK_END: new_offset = file_size(fd) + offset; break;
+    case SEEK_SET: new_offset = offset; break; //从文件头
+    case SEEK_CUR: new_offset = file->open_offset + offset; break; //从当前位置算起
+    case SEEK_END: new_offset = file_size(fd) + offset; break;  //从文件尾算起
     default: assert(0);
   }
 
@@ -162,7 +173,7 @@ const char *fs_fd_name(int fd) {
   }
   return file_table[fd].name;
 }
-
+//init_fs() 初始化**帧缓冲（framebuffer）**的大小。
 void init_fs() {
   file_table[FD_FB].size = 0x200000;
 }

@@ -1,0 +1,264 @@
+mainmenu "NPC Configuration Menu"
+
+choice
+  prompt "Base ISA"
+  default ISA_riscv
+
+config ISA_riscv
+  bool "riscv"
+endchoice
+
+if ISA_riscv
+menu "ISA-dependent Options for riscv"
+
+config RV64
+  bool "64-bit RISC-V architecture"
+  default y
+
+config RVE
+  bool "Use E extension"
+  default n
+endmenu
+endif
+
+config ISA
+  string
+  default "riscv32" if ISA_riscv && !RV64
+  default "riscv64" if ISA_riscv &&  RV64
+  default "none"
+
+config ISA64
+  depends on ISA_riscv && RV64
+  bool
+  default y
+
+config PMEM64
+  bool
+  default y if ISA64
+
+config ISA_riscv64
+  bool
+  default y if ISA_riscv && RV64
+
+menu "Simulation Top Configuration"
+
+choice
+  prompt "Verilator top module"
+  default NPC_TOP_RV64_NPC_TOP
+
+config NPC_TOP_RV64_NPC_TOP
+  bool "rv64_npc_top"
+  help
+    Use the current RV64 pipeline top with the sim SRAM bridge.
+endchoice
+
+config NPC_TOP_MODULE
+  string
+  default "rv64_npc_top" if NPC_TOP_RV64_NPC_TOP
+  default "rv64_npc_top"
+
+endmenu
+
+menu "Build Options"
+
+choice
+  prompt "Host compiler optimization"
+  default CC_O2
+
+config CC_O0
+  bool "O0"
+config CC_O1
+  bool "O1"
+config CC_O2
+  bool "O2"
+config CC_O3
+  bool "O3"
+endchoice
+
+config CC_OPT
+  string
+  default "-O0" if CC_O0
+  default "-O1" if CC_O1
+  default "-O2" if CC_O2
+  default "-O3" if CC_O3
+  default "-O2"
+
+config CC_DEBUG
+  bool "Enable debug information"
+  default n
+
+config CC_ASAN
+  bool "Enable address sanitizer"
+  default n
+endmenu
+
+menu "Memory Configuration"
+
+config MBASE
+  hex "Memory base address"
+  default 0x80000000
+
+config MSIZE
+  hex "Memory size"
+  default 0x8000000
+
+config PC_RESET_OFFSET
+  hex "Offset of reset vector from memory base"
+  default 0
+
+endmenu
+
+menu "Testing and Debugging"
+
+config TRACE
+  bool "Enable tracer"
+  default n
+
+config TRACE_START
+  depends on TRACE
+  int "When tracing is enabled (unit: number of instructions)"
+  default 0
+
+config TRACE_END
+  depends on TRACE
+  int "When tracing is disabled (unit: number of instructions)"
+  default 10000
+
+config ITRACE
+  depends on TRACE
+  bool "Enable instruction tracer"
+  default y
+
+config ITRACE_IRINGBUF
+  depends on ITRACE
+  bool "Enable instruction ring buffer"
+  default y
+
+config MTRACE
+  depends on TRACE
+  bool "Enable memory tracer"
+  default y
+
+config DTRACE
+  depends on TRACE
+  bool "Enable device tracer"
+  default y
+
+config FTRACE
+  depends on TRACE
+  bool "Enable function tracer"
+  default y
+
+config DIFFTEST
+  bool "Enable differential testing"
+  default n
+
+config WATCHPOINT
+  bool "Enable watchpoint"
+  default n
+
+config RT_CHECK
+  bool "Enable runtime checking"
+  default y
+endmenu
+
+menuconfig DEVICE
+  bool "Devices"
+  default y
+  help
+    Provide MMIO device support for NPC.
+
+if DEVICE
+
+config HAS_PORT_IO
+  bool "Enable port I/O"
+  default n
+
+menuconfig HAS_SERIAL
+  bool "Enable serial"
+  default y
+
+if HAS_SERIAL
+config SERIAL_PORT
+  depends on HAS_PORT_IO
+  hex "Port address of the serial controller"
+  default 0x3f8
+
+config SERIAL_MMIO
+  hex "MMIO address of the serial controller"
+  default 0xa00003f8
+endif
+
+menuconfig HAS_TIMER
+  bool "Enable timer"
+  default y
+
+if HAS_TIMER
+config RTC_PORT
+  depends on HAS_PORT_IO
+  hex "Port address of the timer"
+  default 0x48
+
+config RTC_MMIO
+  hex "MMIO address of the timer"
+  default 0xa0000048
+endif
+
+menuconfig HAS_KEYBOARD
+  bool "Enable keyboard"
+  default n
+
+if HAS_KEYBOARD
+config I8042_DATA_PORT
+  depends on HAS_PORT_IO
+  hex "Port address of the keyboard controller"
+  default 0x60
+
+config I8042_DATA_MMIO
+  hex "MMIO address of the keyboard controller"
+  default 0xa0000060
+endif
+
+menuconfig HAS_VGA
+  bool "Enable VGA"
+  default n
+
+if HAS_VGA
+config FB_ADDR
+  hex "Physical address of the VGA frame buffer"
+  default 0xa1000000
+
+config VGA_CTL_PORT
+  depends on HAS_PORT_IO
+  hex "Port address of the VGA controller"
+  default 0x100
+
+config VGA_CTL_MMIO
+  hex "MMIO address of the VGA controller"
+  default 0xa0000100
+
+config VGA_SHOW_SCREEN
+  bool "Enable SDL screen"
+  default y
+endif
+
+endif
+
+menu "Miscellaneous"
+
+config WAVEFORM
+  bool "Enable VCD waveform dump"
+  default n
+
+choice
+  prompt "Host timer"
+  default TIMER_GETTIMEOFDAY
+
+config TIMER_GETTIMEOFDAY
+  bool "gettimeofday"
+
+config TIMER_CLOCK_GETTIME
+  bool "clock_gettime"
+endchoice
+
+endmenu

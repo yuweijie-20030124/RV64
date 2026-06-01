@@ -58,12 +58,18 @@ void sim_t::diff_step(uint64_t n) {
   step(n);
 }
 
+
+//加内部寄存器得来这里修改读写逻辑。
 void sim_t::diff_get_regs(void* diff_context) {
   struct diff_context_t* ctx = (struct diff_context_t*)diff_context;
   for (int i = 0; i < NR_GPR; i++) {
     ctx->gpr[i] = state->XPR[i];
   }
   ctx->pc = state->pc;
+  ctx->mcause = state->mcause->read();
+  ctx->mstatus = state->mstatus->read();
+  ctx->mepc = state->mepc->read();
+  ctx->mtvec = state->mtvec->read();
 }
 
 void sim_t::diff_set_regs(void* diff_context) {
@@ -72,6 +78,10 @@ void sim_t::diff_set_regs(void* diff_context) {
     state->XPR.write(i, (sword_t)ctx->gpr[i]);
   }
   state->pc = ctx->pc;
+  state->mcause->write(ctx->mcause);
+  state->mstatus->write(ctx->mstatus);
+  state->mepc->write(ctx->mepc);
+  state->mtvec->write(ctx->mtvec);
 }
 
 void sim_t::diff_memcpy(reg_t dest, void* src, size_t n) {
