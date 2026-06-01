@@ -120,40 +120,40 @@ word_t isa_reg_str2val(const char *name, bool *test)
 }
 
 void isa_perform_reg_display(void){
-    update_Perform_reg();
-    printf("-------------------------------------------------------------------------------------\n");
-    printf("mcycle          : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mcycle,          reg.mcycle         );
-    printf("minstret        : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.minstret,        reg.minstret       );
-    printf("MPerformance[3 ]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[0 ], reg.mhpmcounter[0 ]);
-    printf("MPerformance[4 ]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[1 ], reg.mhpmcounter[1 ]);
-    printf("MPerformance[5 ]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[2 ], reg.mhpmcounter[2 ]);
-    printf("MPerformance[6 ]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[3 ], reg.mhpmcounter[3 ]);
-    printf("MPerformance[7 ]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[4 ], reg.mhpmcounter[4 ]);
-    printf("MPerformance[8 ]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[5 ], reg.mhpmcounter[5 ]);
-    printf("MPerformance[9 ]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[6 ], reg.mhpmcounter[6 ]);
-    printf("MPerformance[10]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[7 ], reg.mhpmcounter[7 ]);
-    printf("MPerformance[11]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[8 ], reg.mhpmcounter[8 ]);
-    printf("MPerformance[12]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[9 ], reg.mhpmcounter[9 ]);
-    printf("MPerformance[13]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[10], reg.mhpmcounter[10]);
-    printf("MPerformance[14]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[11], reg.mhpmcounter[11]);
-    printf("MPerformance[15]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[12], reg.mhpmcounter[12]);
-    printf("MPerformance[16]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[13], reg.mhpmcounter[13]);
-    printf("MPerformance[17]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[14], reg.mhpmcounter[14]);
-    printf("MPerformance[18]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[15], reg.mhpmcounter[15]);
-    printf("MPerformance[19]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[16], reg.mhpmcounter[16]);
-    printf("MPerformance[20]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[17], reg.mhpmcounter[17]);
-    printf("MPerformance[21]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[18], reg.mhpmcounter[18]);
-    printf("MPerformance[22]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[19], reg.mhpmcounter[19]);
-    printf("MPerformance[23]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[20], reg.mhpmcounter[20]);
-    printf("MPerformance[24]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[21], reg.mhpmcounter[21]);
-    printf("MPerformance[25]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[22], reg.mhpmcounter[22]);
-    printf("MPerformance[26]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[23], reg.mhpmcounter[23]);
-    printf("MPerformance[27]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[24], reg.mhpmcounter[24]);
-    printf("MPerformance[28]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[25], reg.mhpmcounter[25]);
-    printf("MPerformance[29]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[26], reg.mhpmcounter[26]);
-    printf("MPerformance[30]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[27], reg.mhpmcounter[27]);
-    printf("MPerformance[31]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[28], reg.mhpmcounter[28]);
-    printf("-------------------------------------------------------------------------------------\n");
+    // update_Perform_reg();
+    // printf("-------------------------------------------------------------------------------------\n");
+    // printf("mcycle          : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mcycle,          reg.mcycle         );
+    // printf("minstret        : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.minstret,        reg.minstret       );
+    // printf("MPerformance[3 ]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[0 ], reg.mhpmcounter[0 ]);
+    // printf("MPerformance[4 ]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[1 ], reg.mhpmcounter[1 ]);
+    // printf("MPerformance[5 ]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[2 ], reg.mhpmcounter[2 ]);
+    // printf("MPerformance[6 ]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[3 ], reg.mhpmcounter[3 ]);
+    // printf("MPerformance[7 ]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[4 ], reg.mhpmcounter[4 ]);
+    // printf("MPerformance[8 ]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[5 ], reg.mhpmcounter[5 ]);
+    // printf("MPerformance[9 ]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[6 ], reg.mhpmcounter[6 ]);
+    // printf("MPerformance[10]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[7 ], reg.mhpmcounter[7 ]);
+    // printf("MPerformance[11]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[8 ], reg.mhpmcounter[8 ]);
+    // printf("MPerformance[12]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[9 ], reg.mhpmcounter[9 ]);
+    // printf("MPerformance[13]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[10], reg.mhpmcounter[10]);
+    // printf("MPerformance[14]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[11], reg.mhpmcounter[11]);
+    // printf("MPerformance[15]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[12], reg.mhpmcounter[12]);
+    // printf("MPerformance[16]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[13], reg.mhpmcounter[13]);
+    // printf("MPerformance[17]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[14], reg.mhpmcounter[14]);
+    // printf("MPerformance[18]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[15], reg.mhpmcounter[15]);
+    // printf("MPerformance[19]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[16], reg.mhpmcounter[16]);
+    // printf("MPerformance[20]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[17], reg.mhpmcounter[17]);
+    // printf("MPerformance[21]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[18], reg.mhpmcounter[18]);
+    // printf("MPerformance[22]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[19], reg.mhpmcounter[19]);
+    // printf("MPerformance[23]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[20], reg.mhpmcounter[20]);
+    // printf("MPerformance[24]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[21], reg.mhpmcounter[21]);
+    // printf("MPerformance[25]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[22], reg.mhpmcounter[22]);
+    // printf("MPerformance[26]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[23], reg.mhpmcounter[23]);
+    // printf("MPerformance[27]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[24], reg.mhpmcounter[24]);
+    // printf("MPerformance[28]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[25], reg.mhpmcounter[25]);
+    // printf("MPerformance[29]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[26], reg.mhpmcounter[26]);
+    // printf("MPerformance[30]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[27], reg.mhpmcounter[27]);
+    // printf("MPerformance[31]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[28], reg.mhpmcounter[28]);
+    // printf("-------------------------------------------------------------------------------------\n");
 }
 
 void isa_reg_display(void){

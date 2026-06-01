@@ -8,9 +8,7 @@ AM_SRCS := riscv/npc/start.S \
            platform/dummy/vme.c \
            platform/dummy/mpe.c
 
-NPC_HOME ?= $(abspath $(AM_HOME)/../npc)
-
-CFLAGS    += -g -fdata-sections -ffunction-sections
+CFLAGS    += -fdata-sections -ffunction-sections -mstrict-align -I$(AM_HOME)/am/src/riscv/npc/include
 LDSCRIPTS += $(AM_HOME)/scripts/linker.ld
 LDFLAGS   += --defsym=_pmem_start=0x80000000 --defsym=_entry_offset=0x0
 LDFLAGS   += --gc-sections -e _start
@@ -28,12 +26,6 @@ image: image-dep
 	@$(OBJDUMP) -d $(IMAGE).elf > $(IMAGE).txt
 	@echo + OBJCOPY "->" $(IMAGE_REL).bin
 	@$(OBJCOPY) -S --set-section-flags .bss=alloc,contents -O binary $(IMAGE).elf $(IMAGE).bin
-
-check-npc-home:
-	@if [ ! -f "$(NPC_HOME)/Makefile" ]; then \
-		echo "Error: NPC project not found under $(NPC_HOME)"; \
-		exit 1; \
-	fi
 
 run: insert-arg check-npc-home
 	$(MAKE) -C $(NPC_HOME) run NPC_IMG=$(IMAGE).bin NPC_ELF=$(IMAGE).elf NPC_FLAGS="$(NPCFLAGS)"

@@ -241,7 +241,7 @@ assign io_master_awaddr         = sram_waddr[31:0];
 assign io_master_awid           = 4'h0;
 assign io_master_awlen          = 8'h0;
 assign io_master_awsize         = lsu_awsize;
-assign io_master_awburst        = 2'h0;
+assign io_master_awburst        = 2'h1;
 assign io_master_wvalid         = sram_wvalid;
 assign io_master_wdata          = sram_wdata;
 assign io_master_wstrb          = sram_wstrob;
@@ -252,7 +252,7 @@ assign io_master_araddr         = sram_raddr[31:0];
 assign io_master_arid           = 4'h1;
 assign io_master_arlen          = 8'h0;
 assign io_master_arsize         = sram_arsize;
-assign io_master_arburst        = 2'h0; 
+assign io_master_arburst        = 2'h1;
 assign io_master_rready         = sram_rready;
 
 assign io_slave_awready     = 1'b0; 

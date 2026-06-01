@@ -19,15 +19,21 @@
 
 `define NOP 32'h13
 `define RST_PC 64'h80000000
-// `define HAS_AXI_BUS
-// `define HAS_AXI_BUS_ARBITER
-// `define HAS_ICACHE
+`define RISCV64
+`ifdef RISCV64
+    `define DATA_LEN 64
+`else
+    `define DATA_LEN 32
+`endif
+`define HAS_AXI_BUS
+`define HAS_AXI_BUS_ARBITER
+`define HAS_ICACHE
 // `define USE_ICACHE
-// `define HAS_DCACHE
+`define HAS_DCACHE
 // `define ICACHE_LINE_MULIT_SRAM
 // `define DCACHE_LINE_MULIT_SRAM
-// `define SIM
-// `define DPI_C
+`define SIM
+`define DPI_C
 // `define ADD_USE_ADD_BASE
 `define use_booth_mul
 `define PRV_M   2'h3

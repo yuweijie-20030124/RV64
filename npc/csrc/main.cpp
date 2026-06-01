@@ -333,7 +333,8 @@ static void exec_once(char *p, char *p2,paddr_t pc){
     update_reg();
 
     //! end instr 
-    if ((packet.instr) == 0xfc000073){
+    // 0x00100073 = standard ebreak, 0xfc000073 = custom halt encoding
+    if ((packet.instr) == 0xfc000073 || (packet.instr) == 0x00100073){
         set_npc_state(NPC_END, pc, get_gpr(10));
         return;
     }

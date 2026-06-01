@@ -13,12 +13,32 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#include <utils.h>
+#include <common.h>
 
-NPCState npc_state = { .state = NPC_STOP };
+extern uint64_t g_nr_guest_inst;
 
-int is_exit_status_bad() {
-  int good = (npc_state.state == NPC_END && npc_state.halt_ret == 0) ||
-    (npc_state.state == NPC_QUIT);
-  return !good;
+#ifndef CONFIG_TARGET_AM
+FILE *log_fp = NULL;
+
+void init_log(const char *log_file) {
+  log_fp = stdout;
+  if (log_file != NULL) {
+    FILE *fp = fopen(log_file, "w");
+    Assert(fp, "Can not open '%s'", log_file);
+    log_fp = fp;
+  }
+  Log("Log is written to %s", log_file ? log_file : "stdout");
+}
+
+bool log_enable() {
+  return MUXDEF(CONFIG_TRACE, (g_nr_guest_inst >= CONFIG_TRACE_START) &&
+         (g_nr_guest_inst <= CONFIG_TRACE_END), false);
+}
+#endif
+
+extern "C" {
+void init_disasm(const char *triple) {}
+void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte) {
+  str[0] = '\0';
+}
 }

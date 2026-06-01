@@ -24,7 +24,7 @@ NEMU_SO    := $(NEMU_HOME)/build/riscv64-nemu-interpreter-so
 CXX_SRCS_ALL := $(shell find $(NPC_HOME)/csrc -type f \( -name "*.c" -o -name "*.cc" -o -name "*.cpp" \) | sort)
 # The local LLVM headers are not guaranteed to exist. Keep the interface alive
 # with a tiny stub; real instruction tracing can be restored by compiling disasm.cc.
-CXX_SRCS := $(filter-out $(NPC_HOME)/csrc/utils/disasm.cc,$(CXX_SRCS_ALL))
+CXX_SRCS := $(filter-out $(NPC_HOME)/csrc/utils/disasm.cc $(NPC_HOME)/csrc/utils/disasm.c,$(CXX_SRCS_ALL))
 
 define npc_git_commit
 $(if $(ENABLE_GIT_COMMIT),$(call git_commit,$(1)),@true)
@@ -34,6 +34,7 @@ CORE_VSRCS := $(wildcard $(NPC_HOME)/vsrc/core/*.v) \
               $(wildcard $(NPC_HOME)/vsrc/core/utils/*.v)
 
 SIM_DPI_VSRCS := $(NPC_HOME)/vsrc/sim/sim_sram_dpic.v \
+                 $(NPC_HOME)/vsrc/sim/rv64_mem_arb.v \
                  $(NPC_HOME)/vsrc/sim/DifftestArchIntRegState.v \
                  $(NPC_HOME)/vsrc/sim/DifftestCSRState.v \
                  $(NPC_HOME)/vsrc/sim/DifftestInstrCommit.v \
@@ -81,18 +82,19 @@ VERILATOR_FLAGS := -Wno-fatal \
                    $(VINC)
 
 NPC_IMG ?=
-NPC_FLAGS ?= --log=$(NPC_LOG) --diff=$(NEMU_SO) -b
+NPC_FLAGS ?= --log=$(NPC_LOG) -b
 
 .PHONY: sim run gdb clean nemu-so
 
 sim:
+	mkdir -p $(OBJ_DIR)
 	$(VERILATOR) $(VERILATOR_FLAGS) $(CXX_SRCS) $(VSRCS)
 	$(call npc_git_commit, "sim RTL")
 
-run: sim nemu-so
+run: sim
 	$(NPC_BIN) $(NPC_FLAGS) $(NPC_IMG)
 
-gdb: sim nemu-so
+gdb: sim
 	gdb --args $(NPC_BIN) $(NPC_FLAGS) $(NPC_IMG)
 
 nemu-so:
