@@ -70,11 +70,14 @@ void difftest_skip_dut(int nr_ref, int nr_dut) {
 }
 
 void init_difftest(char *ref_so_file, long img_size, int port) {
-  assert(ref_so_file != NULL);
+  Assert(ref_so_file != NULL,
+      "DiffTest is enabled, but no reference shared object is provided. "
+      "Use --diff=REF_SO, for example --diff=/path/to/riscv64-nemu-interpreter-so.");
 
   void *handle;
   handle = dlopen(ref_so_file, RTLD_LAZY);
-  assert(handle);
+  Assert(handle != NULL, "Failed to load reference shared object '%s': %s",
+      ref_so_file, dlerror());
 
   ref_difftest_memcpy = (ref_difftest_memcpy_func_point)dlsym(handle, "difftest_memcpy");
   assert(ref_difftest_memcpy);
@@ -96,9 +99,9 @@ void init_difftest(char *ref_so_file, long img_size, int port) {
       "This will help you a lot for debugging, but also significantly reduce the performance. "
       "If it is not necessary, you can turn it off in menuconfig.", ref_so_file);
   ref_difftest_init(port);
-  ref_difftest_memcpy(PMEM_START, guest_to_host(PMEM_START), PMEM_SIZE, DIFFTEST_TO_REF);
-  ref_difftest_memcpy(MROM_START, guest_to_host(MROM_START), MROM_SIZE, DIFFTEST_TO_REF);
-  ref_difftest_memcpy(FLASH_START, guest_to_host(FLASH_START), FLASH_SIZE, DIFFTEST_TO_REF);
+  Assert(img_size >= 0 && img_size <= PMEM_SIZE,
+      "image size %ld is out of PMEM range", img_size);
+  ref_difftest_memcpy(PMEM_START, guest_to_host(PMEM_START), img_size, DIFFTEST_TO_REF);
   init_ref(&cpu);
   ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
 }

@@ -20,6 +20,7 @@ OBJ_DIR    := $(NPC_HOME)/obj_dir/$(TOP_MODULE)
 NPC_BIN    := $(OBJ_DIR)/V$(TOP_MODULE)
 NPC_LOG    := $(NPC_HOME)/npc-log.txt
 NEMU_SO    := $(NEMU_HOME)/build/riscv64-nemu-interpreter-so
+NPC_DIFF_SO ?= $(NEMU_SO)
 
 CXX_SRCS_ALL := $(shell find $(NPC_HOME)/csrc -type f \( -name "*.c" -o -name "*.cc" -o -name "*.cpp" \) | sort)
 # The local LLVM headers are not guaranteed to exist. Keep the interface alive
@@ -83,6 +84,12 @@ VERILATOR_FLAGS := -Wno-fatal \
 
 NPC_IMG ?=
 NPC_FLAGS ?= --log=$(NPC_LOG) -b
+RUN_DEPS :=
+
+ifeq ($(CONFIG_DIFFTEST),y)
+RUN_DEPS += nemu-so
+override NPC_FLAGS += --diff=$(NPC_DIFF_SO)
+endif
 
 .PHONY: sim run gdb clean nemu-so
 
@@ -91,10 +98,10 @@ sim:
 	$(VERILATOR) $(VERILATOR_FLAGS) $(CXX_SRCS) $(VSRCS)
 	$(call npc_git_commit, "sim RTL")
 
-run: sim
+run: sim $(RUN_DEPS)
 	$(NPC_BIN) $(NPC_FLAGS) $(NPC_IMG)
 
-gdb: sim
+gdb: sim $(RUN_DEPS)
 	gdb --args $(NPC_BIN) $(NPC_FLAGS) $(NPC_IMG)
 
 nemu-so:
