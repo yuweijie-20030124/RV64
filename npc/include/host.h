@@ -28,7 +28,7 @@ static inline word_t host_read(void *addr, int len) {
   }
 }
 
-aa
+
 
 static inline void host_write(void *addr, int len, word_t data) {
   switch (len) {
