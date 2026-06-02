@@ -139,6 +139,16 @@ config MTRACE
   bool "Enable memory tracer"
   default y
 
+config MRACE_START
+  depends on MTRACE
+  hex "Start address of memory trace range"
+  default 0x80000000
+
+config MRACE_END
+  depends on MTRACE
+  hex "End address of memory trace range"
+  default 0x88000000
+
 config DTRACE
   depends on TRACE
   bool "Enable device tracer"
