@@ -41,9 +41,7 @@ void device_update() {
   }
   last = now;
 
-  IFDEF(CONFIG_HAS_VGA, 
-    printf("caosinide\n");
-    vga_update_screen());
+  IFDEF(CONFIG_HAS_VGA,vga_update_screen());
 
 #ifndef CONFIG_TARGET_AM
   SDL_Event event;
@@ -81,7 +79,7 @@ void init_device() {
 
   IFDEF(CONFIG_HAS_SERIAL, init_serial());
   IFDEF(CONFIG_HAS_TIMER, init_timer());
-  IFDEF(CONFIG_HAS_VGA, init_vga());
+  IFDEF(CONFIG_HAS_VGA,     printf("caosinide\n");init_vga());
   IFDEF(CONFIG_HAS_KEYBOARD, init_i8042());
   IFDEF(CONFIG_HAS_AUDIO, init_audio());
   IFDEF(CONFIG_HAS_DISK, init_disk());
