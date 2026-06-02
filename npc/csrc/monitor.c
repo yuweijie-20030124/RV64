@@ -137,11 +137,13 @@ static void parse_args(int argc,char *argv[]){
 char *get_wave_name(){
     return wave_file;
 }
-
+//init screen keyboard
 void init_monitor(VTOP *top, remote_bitbang_t **remote_bitbang, int argc, char *argv[]){
     IFDEF(CONFIG_ITRACE, init_itrace());
     parse_args(argc, argv);
     init_log(log_file);
+    IFDEF(CONFIG_SCREEN,init_vga());
+    // IFDEF(CONFIG_KEYBOARD,);
     IFDEF(CONFIG_FTRACE, init_ftrace(ELF_FILE));
     long img_size=load_img();
     init_sbi_disk();
