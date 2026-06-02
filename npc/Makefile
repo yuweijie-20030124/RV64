@@ -83,7 +83,9 @@ VERILATOR_FLAGS := -Wno-fatal \
                    $(VINC)
 
 NPC_IMG ?=
-NPC_FLAGS ?= --log=$(NPC_LOG) -b
+NPC_FLAGS ?= --log=$(NPC_LOG) 
+# NPC_FLAGS += --diff=$(NPC_DIFF_SO)
+# NPC_FLAGS += -b
 RUN_DEPS :=
 
 ifeq ($(CONFIG_DIFFTEST),y)

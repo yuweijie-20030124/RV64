@@ -103,39 +103,52 @@ extern "C" void sim_sram_write(uint64_t waddr, uint64_t wdata, uint8_t wmask){
 }
 
 extern "C" void sim_periph_read(uint64_t raddr, uint64_t *rdata){
+#ifdef CONFIG_HAS_TIMER
     if((raddr==TIMER_ADDR) || (raddr==(TIMER_ADDR + 4))){
         (*rdata) = ((uint64_t)get_timer_reg(0) | ((uint64_t)get_timer_reg(1) << 32));
         set_skip_ref_flag();
         return;
     }
+#endif
+#ifdef CONFIG_HAS_SBI_DISK
     if ((raddr >= CONFIG_SBI_DISK_MMIO) && (raddr < CONFIG_SBI_DISK_MMIO + 64)){
         sbi_disk_io_handler_r(raddr, rdata);
         set_skip_ref_flag();
         return;
     }
+#endif
+#ifdef CONFIG_HAS_SBI_SERIAL
     if ((raddr >= CONFIG_SBI_SERIAL_MMIO) && (raddr < CONFIG_SBI_SERIAL_MMIO + 8)){
         sbi_serial_io_handler_r(raddr, rdata);
         set_skip_ref_flag();
         return;
     }
+#endif
+#ifdef CONFIG_HAS_SBI_CLINT
     if ((raddr >= CONFIG_SBI_CLINT_MMIO) && (raddr < CONFIG_SBI_CLINT_MMIO + 64 * 1024)){
         sbi_clint_io_handler_r(raddr, rdata);
         set_skip_ref_flag();
         return;
     }
+#endif
+#ifdef CONFIG_HAS_SBI_PLIC
     if ((raddr >= CONFIG_SBI_PLIC_MMIO) && (raddr < CONFIG_SBI_PLIC_MMIO + (2 * 1024 + 64) * 1024)){
         sbi_plic_io_handler_r(raddr, rdata);
         set_skip_ref_flag();
         return;
     }
+#endif
 }
 
 extern "C" void sim_periph_write(uint64_t waddr, uint64_t wdata, uint8_t wmask){
+#ifdef CONFIG_HAS_SERIAL
     if(waddr==SERIAL_ADDR){
         serial_out((char)wdata);
         set_skip_ref_flag();
         return;
     }
+#endif
+#ifdef CONFIG_HAS_TIMER
     if((waddr==TIMER_ADDR)&&(wdata==0)){
         get_uptime();
         set_skip_ref_flag();
@@ -146,27 +159,36 @@ extern "C" void sim_periph_write(uint64_t waddr, uint64_t wdata, uint8_t wmask){
         set_skip_ref_flag();
         return;
     }
+#endif
+#ifdef CONFIG_HAS_SBI_DISK
     if ((waddr >= CONFIG_SBI_DISK_MMIO) && (waddr < CONFIG_SBI_DISK_MMIO + 64)){
         sbi_disk_io_handler_w(waddr, wdata, wmask);
         set_skip_ref_flag();
         return;
     }
+#endif
+#ifdef CONFIG_HAS_SBI_SERIAL
     if ((waddr >= CONFIG_SBI_SERIAL_MMIO) && (waddr < CONFIG_SBI_SERIAL_MMIO + 8)){
         sbi_serial_io_handler_w(waddr, wdata, wmask);
         set_skip_ref_flag();
         return;
     }
+#endif
+#ifdef CONFIG_HAS_SBI_CLINT
     if ((waddr >= CONFIG_SBI_CLINT_MMIO) && (waddr < CONFIG_SBI_CLINT_MMIO + 64 * 1024))
     {
         sbi_clint_io_handler_w(waddr, wdata, wmask);
         set_skip_ref_flag();
         return;
     }
+#endif
+#ifdef CONFIG_HAS_SBI_PLIC
     if ((waddr >= CONFIG_SBI_PLIC_MMIO) && (waddr < CONFIG_SBI_PLIC_MMIO + (2 * 1024 + 64) * 1024)){
         sbi_plic_io_handler_w(waddr, wdata, wmask);
         set_skip_ref_flag();
         return;
     }
+#endif
 }
 
 extern "C" void flash_read(int32_t addr, int32_t *data) { 

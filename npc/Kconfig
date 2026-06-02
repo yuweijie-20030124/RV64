@@ -186,7 +186,7 @@ config SERIAL_PORT
 
 config SERIAL_MMIO
   hex "MMIO address of the serial controller"
-  default 0xa00003f8
+  default 0xa0000000
 endif
 
 menuconfig HAS_TIMER
@@ -201,7 +201,7 @@ config RTC_PORT
 
 config RTC_MMIO
   hex "MMIO address of the timer"
-  default 0xa0000048
+  default 0xa0000100
 endif
 
 menuconfig HAS_KEYBOARD
@@ -242,13 +242,65 @@ config VGA_SHOW_SCREEN
   default y
 endif
 
+menu "SBI Device Configuration"
+
+menuconfig HAS_SBI_SERIAL
+  bool "Enable SBI serial"
+  default y
+
+if HAS_SBI_SERIAL
+config SBI_SERIAL_MMIO
+  hex "MMIO address of SBI serial"
+  default 0x10000000
+endif
+
+menuconfig HAS_SBI_DISK
+  bool "Enable SBI disk"
+  default y
+
+if HAS_SBI_DISK
+config SBI_DISK_MMIO
+  hex "MMIO address of SBI disk"
+  default 0x10100000
+endif
+
+menuconfig HAS_SBI_CLINT
+  bool "Enable SBI CLINT"
+  default y
+
+if HAS_SBI_CLINT
+config SBI_CLINT_MMIO
+  hex "MMIO address of SBI CLINT"
+  default 0x2000000
+endif
+
+menuconfig HAS_SBI_PLIC
+  bool "Enable SBI PLIC"
+  default y
+
+if HAS_SBI_PLIC
+config SBI_PLIC_MMIO
+  hex "MMIO address of SBI PLIC"
+  default 0xc000000
+
+config SBI_PLIC_CONTEXT_COUNT
+  int "SBI PLIC context count"
+  default 2
+endif
+
+endmenu
+
 endif
 
 menu "Miscellaneous"
 
-config WAVEFORM
-  bool "Enable VCD waveform dump"
+config VCD_GET
+  bool "Enable waveform dump"
   default n
+
+config GET_TIMER
+  bool "Measure simulator host time"
+  default y
 
 choice
   prompt "Host timer"

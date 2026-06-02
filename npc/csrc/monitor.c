@@ -156,8 +156,10 @@ void init_monitor(VTOP *top, remote_bitbang_t **remote_bitbang, int argc, char *
     sim_rst();
     Log("successful sim rst\n");
     *remote_bitbang = new remote_bitbang_t(difftest_port, top);
+    #ifdef CONFIG_DIFFTEST
     init_difftest(diff_so_file, img_size, difftest_port);
     Log("successful init difftest\n");
+    #endif
     welcome();
     return;
 }
