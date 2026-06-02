@@ -22,6 +22,14 @@ static inline bool in_flash(paddr_t addr){
     return ((addr >= FLASH_START) && (addr < (FLASH_START + FLASH_SIZE)));
 }
 
+static inline bool in_device(paddr_t addr){
+    return ((addr >= DEVICE_ADDR) && (addr < (DEVICE_ADDR + 0x1000))) ||
+           ((addr >= CONFIG_SBI_DISK_MMIO) && (addr < CONFIG_SBI_DISK_MMIO + 64)) ||
+           ((addr >= CONFIG_SBI_SERIAL_MMIO) && (addr < CONFIG_SBI_SERIAL_MMIO + 8)) ||
+           ((addr >= CONFIG_SBI_CLINT_MMIO) && (addr < CONFIG_SBI_CLINT_MMIO + 64 * 1024)) ||
+           ((addr >= CONFIG_SBI_PLIC_MMIO) && (addr < CONFIG_SBI_PLIC_MMIO + (2 * 1024 + 64) * 1024));
+}
+
 void *guest_to_host(paddr_t addr){
     if(in_pmem(addr)){
         return (pmem + addr - PMEM_START);
@@ -93,12 +101,23 @@ extern "C" void sim_vmem_write(uint32_t waddr, uint32_t wdata, uint8_t wmask){
     else assert(0);
 }
 
+extern "C" void sim_periph_read(uint64_t raddr, uint64_t *rdata);
+extern "C" void sim_periph_write(uint64_t waddr, uint64_t wdata, uint8_t wmask);
+
 extern "C" void sim_sram_read(uint64_t raddr, uint64_t *rdata){
-    raddr &= (~0x7U);
+    if(in_device(raddr)){
+        sim_periph_read(raddr, rdata);
+        return;
+    }
+    raddr &= (~0x7ULL);
     pmem_read(raddr, rdata);
 }
 
 extern "C" void sim_sram_write(uint64_t waddr, uint64_t wdata, uint8_t wmask){
+    if(in_device(waddr)){
+        sim_periph_write(waddr, wdata, wmask);
+        return;
+    }
     pmem_write(waddr, wdata, wmask);
 }
 
@@ -125,6 +144,11 @@ extern "C" void sim_periph_read(uint64_t raddr, uint64_t *rdata){
     }
     if ((raddr >= CONFIG_SBI_PLIC_MMIO) && (raddr < CONFIG_SBI_PLIC_MMIO + (2 * 1024 + 64) * 1024)){
         sbi_plic_io_handler_r(raddr, rdata);
+        set_skip_ref_flag();
+        return;
+    }
+    if((raddr >= DEVICE_ADDR) && (raddr < DEVICE_ADDR + 0x1000)){
+        *rdata = 0;
         set_skip_ref_flag();
         return;
     }
@@ -164,6 +188,10 @@ extern "C" void sim_periph_write(uint64_t waddr, uint64_t wdata, uint8_t wmask){
     }
     if ((waddr >= CONFIG_SBI_PLIC_MMIO) && (waddr < CONFIG_SBI_PLIC_MMIO + (2 * 1024 + 64) * 1024)){
         sbi_plic_io_handler_w(waddr, wdata, wmask);
+        set_skip_ref_flag();
+        return;
+    }
+    if((waddr >= DEVICE_ADDR) && (waddr < DEVICE_ADDR + 0x1000)){
         set_skip_ref_flag();
         return;
     }
