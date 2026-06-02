@@ -192,7 +192,7 @@ void sim_init(int argc, char *argv[]){
         switch (lightsss->do_fork()) {
             case FORK_ERROR: set_npc_state(NPC_ABORT, get_gpr(32), 1); break;
             case FORK_CHILD:
-                top->atClone(); // dump wave
+                //top->atClone(); // dump wave
                 Verilated::traceEverOn(true);
 #ifdef ENABLE_VCD
                 tfp = new VerilatedVcdC;
@@ -353,7 +353,6 @@ static void exec_once(char *p, char *p2,paddr_t pc){
         switch (lightsss->do_fork()) {
             case FORK_ERROR: set_npc_state(NPC_ABORT, get_gpr(32), 1); break;
             case FORK_CHILD:
-                top->atClone(); // dump wave
                 Verilated::traceEverOn(true);
 #ifdef ENABLE_VCD
                 tfp = new VerilatedVcdC;
