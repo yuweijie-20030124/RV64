@@ -9,7 +9,7 @@ module DifftestInstrCommit(
   input         io_vecwen,	//向量寄存器写使能
   input  [ 4:0] io_wpdest,	//写入的物理寄存器目标
   input  [ 7:0] io_wdest,		//写入的虚拟寄存器目标
-  input  [31:0] io_pc,			//当前的程序计数器PC
+  input  [63:0] io_pc,			//当前的程序计数器PC
   input  [31:0] io_instr,		//当前的指令内容
   input  [ 9:0] io_robIdx,	//ROB重排序缓冲区索引
   input  [ 6:0] io_lqIdx,		//LQ负载队列索引
@@ -30,7 +30,7 @@ import "DPI-C" function void difftest_InstrCommit (
   input       bit io_vecwen,
   input      byte io_wpdest,
   input      byte io_wdest,
-  input       int io_pc,
+  input   longint io_pc,
   input       int io_instr,
   input       int io_robIdx,
   input      byte io_lqIdx,
