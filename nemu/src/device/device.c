@@ -74,6 +74,7 @@ void sdl_clear_event_queue() {
 }
 
 void init_device() {
+  printf("caosinide\n");
   IFDEF(CONFIG_TARGET_AM, ioe_init());
   init_map();
 
