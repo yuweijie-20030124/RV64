@@ -171,7 +171,7 @@ void nvboard_bind_all_pins(VTOP* top) {
 void my_handler(int param){
     set_npc_state(NPC_END, get_gpr(32), get_gpr(10));
 }
-//init screen keyboard
+
 void sim_init(int argc, char *argv[]){
     atexit(statistic);
     if (enable_fork) {
