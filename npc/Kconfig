@@ -170,6 +170,14 @@ config WATCHPOINT
 config RT_CHECK
   bool "Enable runtime checking"
   default y
+
+config USE_NVBOARD
+  bool "Enable NVBoard virtual board"
+  default n
+  help
+    Enable NVBoard for visualizing LEDs, 7-segment displays,
+    switches, VGA, UART, and PS/2 on a virtual board.
+    Requires SDL2, SDL2_image, and SDL2_ttf.
 endmenu
 
 menuconfig DEVICE

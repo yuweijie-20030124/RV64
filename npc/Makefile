@@ -2,6 +2,7 @@ NPC_HOME  := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 YSYX_HOME := $(abspath $(NPC_HOME)/..)
 NEMU_HOME ?= $(YSYX_HOME)/nemu
 SONPC_HOME := $(NPC_HOME)
+NVBOARD_HOME ?= $(YSYX_HOME)/nvboard
 
 .DEFAULT_GOAL := sim
 
@@ -12,6 +13,17 @@ include $(NPC_HOME)/scripts/config.mk
 
 -include $(NPC_HOME)/include/config/auto.conf
 -include $(NPC_HOME)/include/config/auto.conf.cmd
+
+# NVBoard support
+ifeq ($(CONFIG_USE_NVBOARD),y)
+include $(NVBOARD_HOME)/scripts/nvboard.mk
+NVBOARD_CFLAGS := -DUSE_NVBOARD \
+                  -I$(NVBOARD_HOME)/include \
+                  -I$(NVBOARD_HOME)/usr/include \
+                  $(shell sdl2-config --cflags)
+NVBOARD_LDFLAGS := $(NVBOARD_ARCHIVE) \
+                   $(shell sdl2-config --libs) -lSDL2_image -lSDL2_ttf
+endif
 
 TOP_MODULE ?= ysyx_core_npc_top
 VERILATOR  ?= verilator
@@ -67,7 +79,8 @@ VERILATOR_CFLAGS := -I$(NPC_HOME)/include \
                     -DVTOP_H=\\\"V$(TOP_MODULE).h\\\" \
                     -DTOPNAME=\\\"$(TOP_MODULE)\\\" \
                     -DPC_RST=0x80000000ULL \
-                    -D__GUEST_ISA__=riscv64
+                    -D__GUEST_ISA__=riscv64 \
+                    $(NVBOARD_CFLAGS)
 
 VERILATOR_FLAGS := -Wno-fatal \
                    -Wall \
@@ -79,7 +92,7 @@ VERILATOR_FLAGS := -Wno-fatal \
                    --timescale "1ns/1ns" \
                    --no-timing \
                    -CFLAGS "$(VERILATOR_CFLAGS)" \
-                   -LDFLAGS "-lreadline -ldl -pthread" \
+                   -LDFLAGS "-lreadline -ldl -pthread $(NVBOARD_LDFLAGS)" \
                    $(VINC)
 
 NPC_IMG ?=
@@ -93,7 +106,11 @@ RUN_DEPS += nemu-so
 override NPC_FLAGS += --diff=$(NPC_DIFF_SO)
 endif
 
-.PHONY: sim run gdb clean nemu-so
+ifeq ($(CONFIG_USE_NVBOARD),y)
+RUN_DEPS += $(NVBOARD_ARCHIVE)
+endif
+
+.PHONY: sim run gdb clean nemu-so nvboard-clean
 
 sim:
 	mkdir -p $(OBJ_DIR)

@@ -20,4 +20,5 @@ module vga_top_apb(
   output        vga_valid
 );
 
+
 endmodule
