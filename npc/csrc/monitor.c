@@ -142,7 +142,7 @@ void init_monitor(VTOP *top, remote_bitbang_t **remote_bitbang, int argc, char *
     IFDEF(CONFIG_ITRACE, init_itrace());
     parse_args(argc, argv);
     init_log(log_file);
-    IFDEF(CONFIG_SCREEN,init_vga());
+    // IFDEF(CONFIG_SCREEN,init_vga());
     // IFDEF(CONFIG_KEYBOARD,);
     IFDEF(CONFIG_FTRACE, init_ftrace(ELF_FILE));
     long img_size=load_img();
