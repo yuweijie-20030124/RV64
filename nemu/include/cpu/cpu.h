@@ -1,5 +1,5 @@
 /***************************************************************************************
-* Copyright (c) 2014-2024 Zihao Yu, Nanjing University
+* Copyright (c) 2014-2022 Zihao Yu, Nanjing University
 *
 * NEMU is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
@@ -18,15 +18,14 @@
 
 #include <common.h>
 
+void statistic();
 void cpu_exec(uint64_t n);
-void magic_instruction(void);
+
 void set_nemu_state(int state, vaddr_t pc, int halt_ret);
 void invalid_inst(vaddr_t thispc);
-void magic_instruction();
 
-
-
-#define NEMUTRAP(thispc, code) set_nemu_state(NEMU_END, thispc, code)  //退出nemu
+#define NEMUTRAP(thispc, code) set_nemu_state(NEMU_END, thispc, code)
+#define NEMUBREAK(thispc, code) set_nemu_state(NEMU_STOP, thispc, code)
 #define INV(thispc) invalid_inst(thispc)
 
 #endif

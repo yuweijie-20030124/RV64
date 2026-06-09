@@ -1,5 +1,5 @@
 /***************************************************************************************
-* Copyright (c) 2014-2024 Zihao Yu, Nanjing University
+* Copyright (c) 2014-2022 Zihao Yu, Nanjing University
 *
 * NEMU is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
@@ -17,135 +17,16 @@
 
 #define NR_WP 32
 
-
-
-typedef struct watchpoint {
-  int NO;
-  char expr[1000];
-  word_t last;//上一次的值
-  struct watchpoint *next;
-
-  /* TODO: Add more members if necessary */
-
-} WP;
-
 static WP wp_pool[NR_WP] = {};
 static WP *head = NULL, *free_ = NULL;
 
-int update_watchpoint() {
-	int n_changed = 0;
-	WP *ptr = head;
-	while (ptr != NULL) {
-		bool success = false;
-		word_t value = expr(ptr->expr, &success);
-		Assert(success, "wrong expression %s\n", ptr->expr);
-
-		if (value != ptr->last) {
-			n_changed += 1;
-			printf("Watchpoint %d: %s\n", ptr->NO, ptr->expr);
-			printf("				Old value = 0x%lx(%ld)\n", ptr->last, ptr->last);
-			printf("				New value = 0x%lx(%ld)\n", value, value);
-			ptr->last = value;
-		}
-		ptr = ptr->next;
-	}
-	return n_changed;
-}
-
-WP* new_wp(){
-  if(free_==NULL){
-    Log("The free_ is NULL\n");
-    return 0;
-  }
-  WP* tmp=free_;
-  free_=free_->next;
-  tmp->next=head;
-  head=tmp;
-  return head;
-}
-
-void free_wp(WP *wp){
-  if(head==NULL){
-    Log("No watchpoint to free\n");
-    return;
-  }
-
-  if(wp==head){
-    head=head->next;
-    wp->next=free_;
-    free_=wp;
-  }
-  else{
-    WP *tmp=head;
-    while(tmp->next!=wp) tmp=tmp->next;
-    if(tmp==NULL) return;
-    tmp->next=wp->next;
-    wp->next=free_;
-    free_=wp;
-  }
-  return;
-}
-
-void add_watch(char *expr,word_t addr){
-  WP* wp=new_wp();
-  if(expr==NULL){
-    printf("Error:add null expr");
-    return;
-  }
-  strcpy(wp->expr,expr);
-  wp->last=addr;
-  printf("watchpoint %d: %s\n",wp->NO,expr);
-}
-void display_watch(){
-  WP* h=head;
-  if(h==NULL){
-    Log("No watchpoints\n");
-  }else{
-    printf("Num     What    Value\n");
-    while(h){
-      printf("%-8d%-8s%lu(0x%08lx)\n",h->NO,h->expr,h->last,h->last);
-      h=h->next;
-    }
-  }
-}
-void remove_watch(int num){
-  WP* n = &wp_pool[num];
-  free_wp(n);
-  printf("Delete watchpoint %d: %s\n", n->NO, n->expr);
-}
-void wp_trace(char *decodelog){
-  #ifdef CONFIG_WP_TRACE
-  WP* h=head;
-  bool flag=false;
-  bool flagput=false;
-  while(h){
-    bool b;
-    word_t new=expr(h->expr,&b);
-    if(new!=h->last){
-      if(flagput==false){
-        puts(decodelog);
-        flagput=true;
-      }
-      printf("watchpoint %d: %s\n",h->NO,h->expr);
-      printf("Old value = %u(0x%08x)\n",h->last,h->last);
-      printf("New value = %u(0x%08x)\n",new,new);
-      h->last=new;
-      flag=true;
-    }
-    h=h->next;
-  }
-  if(flag) nemu_state.state=NEMU_STOP;
-  #endif
-}
-
-
-
-//初始化watchpoint链表
 void init_wp_pool() {
   int i;
   for (i = 0; i < NR_WP; i ++) {
     wp_pool[i].NO = i;
+    wp_pool[i].Hitnum = 0;
     wp_pool[i].next = (i == NR_WP - 1 ? NULL : &wp_pool[i + 1]);
+    wp_pool[i].prev = (i == 0         ? NULL : &wp_pool[i - 1]);
   }
 
   head = NULL;
@@ -153,3 +34,151 @@ void init_wp_pool() {
 }
 
 /* TODO: Implement the functionality of watchpoint */
+
+WP* new_wp(){
+    WP *watchp = NULL;
+    WP *old_WP = free_;
+    int min = 100;
+    if (free_ != NULL){
+
+        while(old_WP!=NULL){
+            if(old_WP->NO<min){
+                watchp = old_WP;
+                min = old_WP->NO;
+            }
+            old_WP = old_WP->next;
+        }
+        if((watchp->next!=NULL)&&(watchp->prev!=NULL)){
+            watchp->prev->next = watchp->next;
+            watchp->next->prev = watchp->prev;
+        }
+        else if(watchp->next!=NULL){
+            free_ = watchp->next;
+            watchp->next->prev = NULL;
+        }
+        else if(watchp->prev!=NULL){
+            watchp->prev->next = NULL;
+        }
+        else{
+            free_ = NULL;
+        }
+        watchp->prev = NULL;
+        watchp->next = NULL;
+
+        old_WP = head;
+        if(head==NULL){
+            head = watchp;
+            return watchp;
+        }
+        while(old_WP!=NULL){
+            if(old_WP->NO < watchp->NO){
+                if(old_WP->next==NULL){
+                    old_WP->next = watchp;
+                    watchp->prev = old_WP;
+                    return watchp;
+                }
+                else{
+                    old_WP = old_WP->next;
+                }
+            }
+            else{
+                watchp->prev = old_WP->prev;
+                watchp->next = old_WP;
+                if(old_WP->prev!=NULL){
+                    old_WP->prev->next = watchp;
+                }
+                old_WP->prev = watchp;
+                return watchp;
+            }
+        }
+    }
+    else{
+        assert(0);
+    }
+    return NULL;
+}
+
+void free_wp(int NO){
+    WP *wp=head;
+    while (wp!=NULL){
+        if(wp->NO==NO){
+            break;
+        }
+        wp = wp->next;
+    }
+    if(wp==NULL){
+        Log("you free a nonexistent watchpoint: %d", NO);
+        return;
+    }
+    wp->Hitnum = 0;
+    if (wp->next != NULL){
+        wp->next->prev = wp->prev;
+    }
+    if(wp->prev!=NULL){
+        wp->prev->next = wp->next;
+    }
+    if(head==wp){
+        if(wp->next!=NULL){
+            head = wp->next;
+        }
+        else{
+            head = NULL;
+        }
+    }
+    wp->prev = NULL;
+    wp->next = free_;
+    if(free_!=NULL){
+        free_->prev = wp;
+    }
+    free_ = wp;
+    printf("succue to free the %d watchpoint\n", NO);
+    return;
+}
+
+void watchpoint_display(){
+    if(head==NULL){
+        printf("Now don't have watchpoint\n");
+        return;
+    }
+    printf("No  Hitnum What\n");
+    WP *now = head;
+    while(now!=NULL){
+        printf("%-3d %-6d ", now->NO, now->Hitnum);
+        for (int i = 0; i < now->wp_nr_token;i++){
+            printf("%s ", now->wp_tokens[i].str);
+        }
+        printf("\n");
+        now = now->next;
+    }
+    return;
+}
+
+
+bool check_watchpoint(){
+    bool check_bool = true;
+    WP *now = head;
+
+    while(now!=NULL){
+        bool check_succue = true;
+        word_t now_value = expr(NULL, &check_succue, true, &now->wp_nr_token, now->wp_tokens);
+        if(check_succue==false)
+            assert(0);
+        else if (now_value != now->old_value){
+            printf("watchpoint %-3d: ", now->NO);
+            for (int i = 0; i < now->wp_nr_token;i++){
+                printf("%s", now->wp_tokens[i].str);
+            }
+            printf("\n");
+            printf("\n");
+            printf("\n");
+            now->Hitnum++;
+            printf("Old value = " FMT_WORD "\n", now->old_value);
+            printf("New value = " FMT_WORD "\n", now_value);
+            now->old_value = now_value;
+            check_bool = false;
+        }
+        now = now->next;
+    }
+
+    return check_bool;
+}

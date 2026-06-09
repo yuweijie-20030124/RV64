@@ -1,5 +1,5 @@
 /***************************************************************************************
-* Copyright (c) 2014-2024 Zihao Yu, Nanjing University
+* Copyright (c) 2014-2022 Zihao Yu, Nanjing University
 *
 * NEMU is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
@@ -18,7 +18,7 @@
 #include <memory/vaddr.h>
 #include <device/map.h>
 
-#define IO_SPACE_MAX (32 * 1024 * 1024)
+#define IO_SPACE_MAX (16 * 1024 * 1024)
 
 static uint8_t *io_space = NULL;
 static uint8_t *p_space = NULL;
@@ -53,20 +53,24 @@ void init_map() {
 }
 
 word_t map_read(paddr_t addr, int len, IOMap *map) {
-  assert(len >= 1 && len <= 8);
-  check_bound(map, addr);
-  paddr_t offset = addr - map->low;
-  invoke_callback(map->callback, offset, len, false); // prepare data to read
-  word_t ret = host_read(map->space + offset, len);
-  IFDEF(CONFIG_DTRACE, Log("read device %s : address in  = " FMT_PADDR ", len = %d\n", map->name , addr, len));
-  return ret;
+    assert(len >= 1 && len <= 8);
+    check_bound(map, addr);
+    paddr_t offset = addr - map->low;
+    invoke_callback(map->callback, offset, len, false); // prepare data to read
+    word_t ret = host_read(map->space + offset, len);
+    IFDEF(CONFIG_DTRACE, Log_func(ANSI_FMT("DTRACE READ", ANSI_FG_YELLOW) ": "
+                                                                     "call to " ANSI_FMT("%s", ANSI_FG_GREEN) " " ANSI_FMT("%d", ANSI_FG_MAGENTA) " Byte data with addr: " ANSI_FMT(FMT_PADDR, ANSI_FG_BLUE) "\n",
+                                  map->name, len, addr));
+    return ret;
 }
 
 void map_write(paddr_t addr, int len, word_t data, IOMap *map) {
-  assert(len >= 1 && len <= 8);
-  check_bound(map, addr);
-  paddr_t offset = addr - map->low;
-  host_write(map->space + offset, len, data);
-  invoke_callback(map->callback, offset, len, true);
-  IFDEF(CONFIG_DTRACE, Log("write device %s : address in = " FMT_PADDR ", len = %d\n",  map->name , addr, len));
+    assert(len >= 1 && len <= 8);
+    check_bound(map, addr);
+    paddr_t offset = addr - map->low;
+    host_write(map->space + offset, len, data);
+    invoke_callback(map->callback, offset, len, true);
+    IFDEF(CONFIG_DTRACE, Log_func(ANSI_FMT("DTRACE WRITE", ANSI_FG_YELLOW) ": "
+                                                                     "call to " ANSI_FMT("%s", ANSI_FG_GREEN) " " ANSI_FMT("%d", ANSI_FG_MAGENTA) " Byte data with addr: " ANSI_FMT(FMT_PADDR, ANSI_FG_BLUE) "\n",
+                                  map->name, len, addr));
 }

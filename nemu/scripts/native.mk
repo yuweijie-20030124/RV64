@@ -1,5 +1,5 @@
 #***************************************************************************************
-# Copyright (c) 2014-2024 Zihao Yu, Nanjing University
+# Copyright (c) 2014-2022 Zihao Yu, Nanjing University
 #
 # NEMU is licensed under Mulan PSL v2.
 # You can use this software according to the terms and conditions of the Mulan PSL v2.
@@ -20,7 +20,7 @@ include $(NEMU_HOME)/tools/difftest.mk
 
 compile_git:
 	$(call git_commit, "compile NEMU")
-$(BINARY):: compile_git
+$(BINARY): compile_git
 
 # Some convenient rules
 
@@ -47,4 +47,9 @@ $(clean-tools):
 clean-tools: $(clean-tools)
 clean-all: clean distclean clean-tools
 
-.PHONY: run gdb run-env clean-tools clean-all $(clean-tools)
+.PHONY: run gdb run-env clean-tools clean-all $(clean-tools) count
+
+count:
+# @total=$( find $(NEMU_HOME) -type f \( -name "*.c" -o -name "*.h" \) | xargs cat | sed -r '/^\s*$/d' | wc -l)
+# @echo "now total line is $(total)"
+	@bash $(NEMU_HOME)/count.sh

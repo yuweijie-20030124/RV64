@@ -1,5 +1,5 @@
 /***************************************************************************************
-* Copyright (c) 2014-2024 Zihao Yu, Nanjing University
+* Copyright (c) 2014-2022 Zihao Yu, Nanjing University
 *
 * NEMU is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
@@ -22,7 +22,7 @@
 #include <string.h>
 
 #include <generated/autoconf.h>
-#include <macro.h>
+#include "macro.h"
 
 #ifdef CONFIG_TARGET_AM
 #include <klib.h>
@@ -39,11 +39,38 @@ typedef MUXDEF(CONFIG_ISA64, uint64_t, uint32_t) word_t;
 typedef MUXDEF(CONFIG_ISA64, int64_t, int32_t)  sword_t;
 #define FMT_WORD MUXDEF(CONFIG_ISA64, "0x%016" PRIx64, "0x%08" PRIx32)
 
+//myself
+#define FMT_WORD_INT MUXDEF(CONFIG_ISA64, "%-21lu", "%-21u")
+//myself
+
 typedef word_t vaddr_t;
-typedef MUXDEF(PMEM64, uint64_t, uint32_t) paddr_t;
-#define FMT_PADDR MUXDEF(PMEM64, "0x%016" PRIx64, "0x%08" PRIx32)
+// typedef MUXDEF(PMEM64, uint64_t, uint32_t) paddr_t;
+// #define FMT_PADDR MUXDEF(PMEM64, "0x%016" PRIx64, "0x%08" PRIx32)
+typedef vaddr_t paddr_t;
+#define FMT_PADDR FMT_WORD
 typedef uint16_t ioaddr_t;
 
 #include <debug.h>
+
+typedef struct token {
+  int type;
+  char str[32];
+} Token;
+
+typedef struct watchpoint {
+    int NO;
+    struct watchpoint *next;
+    struct watchpoint *prev;
+
+  /* TODO: Add more members if necessary */
+
+    int Hitnum;
+    word_t old_value;
+    int wp_nr_token;
+    Token wp_tokens[100];
+
+} WP;
+
+bool check_watchpoint();
 
 #endif

@@ -1,5 +1,5 @@
 /***************************************************************************************
-* Copyright (c) 2014-2024 Zihao Yu, Nanjing University
+* Copyright (c) 2014-2022 Zihao Yu, Nanjing University
 *
 * NEMU is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
@@ -27,63 +27,83 @@ enum {
   nr_reg
 };
 
-static uint32_t sbuf_pos = 0; //标记当前读取位置
-static uint8_t *sbuf = NULL;  //循环使用的音频缓冲区
+static uint8_t *sbuf = NULL;
 static uint32_t *audio_base = NULL;
 
-void sdl_audio_callback(void *userdata, uint8_t *stream, int len){
-  SDL_memset(stream, 0, len);
-  //printf("%d\n",len);
-  uint32_t used_cnt = audio_base[reg_count];  //剩余数据量
-  len = len > used_cnt ? used_cnt : len;  //保证读取不超过可用数据量
-  uint32_t sbuf_size = audio_base[reg_sbuf_size];
-  //如果剩余数据(sbuf_pos + len)超过缓冲区大小(sbuf_size)，需要分两次播放，需要指针回到开头再输入
-  if( (sbuf_pos + len) > sbuf_size ){
-    SDL_MixAudio(stream, sbuf + sbuf_pos, sbuf_size - sbuf_pos , SDL_MIX_MAXVOLUME);
-    SDL_MixAudio(stream + sbuf_size - sbuf_pos, sbuf + sbuf_size - sbuf_pos, 
-                    len - sbuf_size + sbuf_pos, SDL_MIX_MAXVOLUME);
-  }
-  else 
-    SDL_MixAudio(stream, sbuf + sbuf_pos, len , SDL_MIX_MAXVOLUME);
-  sbuf_pos = (sbuf_pos + len) % sbuf_size; 
-  audio_base[reg_count] -= len;
-  //printf("%u\n",audio_base[reg_count]);
-}
+SDL_AudioSpec s = {};
 
-int init_sound() {
-  SDL_AudioSpec s = {};
-  s.format = AUDIO_S16SYS;  // 假设系统中音频数据的格式总是使用16位有符号数来表示
-  s.userdata = NULL;  
-  s.freq = audio_base[reg_freq];
-  s.channels = audio_base[reg_channels];
-  s.samples = audio_base[reg_samples];
-  //printf("%d\n",s.samples);
-  s.callback = sdl_audio_callback;
-  int ret = SDL_InitSubSystem(SDL_INIT_AUDIO);
-  if (ret == 0) {
-    SDL_OpenAudio(&s, NULL);
-    SDL_PauseAudio(0);
-  }       
-  return 0;
+static uint8_t *sb_start = NULL;
+static uint8_t *sb_end = NULL;
+static uint32_t sb_count = 0;
+
+void audio_play(void *userdata, Uint8 *stream, int len){
+    // printf("paly\n");
+    memset(stream, 0, len);
+    int my_fifo_len = audio_base[5];
+    if (my_fifo_len==0){
+        // printf("no data\n");
+        return;
+    }
+    len = (len < my_fifo_len) ? len : my_fifo_len;
+    uint8_t *new_sb_buf = malloc(len);
+    if((sb_start+len-sbuf)>=CONFIG_SB_SIZE){
+        int temp_len = CONFIG_SB_SIZE - (uint32_t)(sb_start - sbuf);
+        memcpy(new_sb_buf, sb_start, temp_len);
+        memcpy(new_sb_buf + temp_len, sbuf, len - temp_len);
+    }
+    else{
+        memcpy(new_sb_buf, sb_start, len);
+    }
+    SDL_MixAudio(stream, new_sb_buf, len, SDL_MIX_MAXVOLUME);
+    // sb_start += len;
+    // if((sb_start-sbuf)>CONFIG_SB_SIZE)
+    //     sb_start -= CONFIG_SB_SIZE;
+    sb_start = sbuf + (((sb_start - sbuf) + len) % CONFIG_SB_SIZE);
+    audio_base[5] = (sb_end >= sb_start) ? (sb_end - sb_start ) : (CONFIG_SB_SIZE + sb_end - sb_start );
+    free(new_sb_buf);
 }
 
 static void audio_io_handler(uint32_t offset, int len, bool is_write) {
-  if(audio_base[reg_init] == 1){
-    init_sound();
-    audio_base[reg_init] = 0;
-  }
+    if((offset==0x10)&&(is_write)&&(audio_base[4]==1)){
+        s.freq = audio_base[0];
+        s.channels = audio_base[1];
+        s.samples = audio_base[2];
+        printf("the freq is %d, the channels is %d, samples is %d\n", audio_base[0], audio_base[1], audio_base[2]);
+        SDL_OpenAudio(&s, NULL);
+        SDL_PauseAudio(0);
+    }
+}
+
+static void call_of_sbuf(uint32_t offset, int len, bool is_write){
+    // printf("data get\n");
+    sb_end = (sbuf + ((offset + len) % CONFIG_SB_SIZE));
+    audio_base[5] = (sb_end >= sb_start) ? (sb_end - sb_start ) : (CONFIG_SB_SIZE + sb_end - sb_start );
 }
 
 void init_audio() {
-  uint32_t space_size = sizeof(uint32_t) * nr_reg;
-  audio_base = (uint32_t *)new_space(space_size);
+    uint32_t space_size = sizeof(uint32_t) * nr_reg;
+    audio_base = (uint32_t *)new_space(space_size);
+    memset(audio_base, 0, space_size);
 #ifdef CONFIG_HAS_PORT_IO
-  add_pio_map ("audio", CONFIG_AUDIO_CTL_PORT, audio_base, space_size, audio_io_handler);
+    add_pio_map("audio", CONFIG_AUDIO_CTL_PORT, audio_base, space_size, audio_io_handler);
 #else
-  add_mmio_map("audio", CONFIG_AUDIO_CTL_MMIO, audio_base, space_size, audio_io_handler);
+    add_mmio_map("audio", CONFIG_AUDIO_CTL_MMIO, audio_base, space_size, audio_io_handler);
 #endif
 
-  sbuf = (uint8_t *)new_space(CONFIG_SB_SIZE);
-  add_mmio_map("audio-sbuf", CONFIG_SB_ADDR, sbuf, CONFIG_SB_SIZE, NULL);
-  audio_base[reg_sbuf_size] = CONFIG_SB_SIZE;    //确定流缓冲区的大小
+    sbuf = (uint8_t *)new_space(CONFIG_SB_SIZE);
+    add_mmio_map("audio-sbuf", CONFIG_SB_ADDR, sbuf, CONFIG_SB_SIZE, call_of_sbuf);
+
+    audio_base[3] = CONFIG_SB_SIZE;
+    audio_base[4] = 0;
+    audio_base[5] = 0;
+
+    s.format = AUDIO_S16SYS;
+    s.userdata = NULL;
+    s.silence = 0;
+    s.callback = audio_play;
+    SDL_InitSubSystem(SDL_INIT_AUDIO);
+
+    sb_start = sbuf;
+    sb_end = sbuf;
+    sb_count = CONFIG_SB_SIZE;
 }

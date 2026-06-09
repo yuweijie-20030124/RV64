@@ -1,5 +1,5 @@
 /***************************************************************************************
-* Copyright (c) 2014-2024 Zihao Yu, Nanjing University
+* Copyright (c) 2014-2022 Zihao Yu, Nanjing University
 *
 * NEMU is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
@@ -15,6 +15,7 @@
 
 #include <isa.h>
 #include "local-include/reg.h"
+#include "stdio.h"
 
 const char *regs[] = {
   "$0", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
@@ -23,39 +24,42 @@ const char *regs[] = {
   "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"
 };
 
+static const char *privileges[] = {
+    "Uesr_mode", "Supervisor_mode", NULL, "Machine_mode"
+};
+
 void isa_reg_display() {
-    // PC 单独一行，与其他寄存器保持相同的列宽格式
-    printf("%-8s 0x%016lx %12ld\n", "PC", cpu.pc, cpu.pc);
-    
-    // 每个寄存器占4列：名称(8)、十六进制(18，含0x)、十进制(12)
-    for (int i = 0; i < 32; i++) {
-        printf("%-8s 0x%016lx %12ld", reg_name(i), gpr(i), gpr(i));
-        if ((i + 1) % 4 == 0) {
-            printf("\n");   // 每四个换行
-        } else {
-            printf("  ");   // 两个空格分隔寄存器块（不用制表符）
-        }
-    }
-    
-    // 打印 CSR 寄存器，单独一行，保持对齐
-    printf("\n");  // 在寄存器组后换行
-    printf("%-8s 0x%016lx %12ld  ", "mcause", cpu.mcause, cpu.mcause);
-    printf("%-8s 0x%016lx %12ld  ", "mstatus", cpu.mstatus, cpu.mstatus);
-    printf("%-8s 0x%016lx %12ld  ", "mepc", cpu.mepc, cpu.mepc);
-    printf("%-8s 0x%016lx %12ld\n", "mtvec", cpu.mtvec, cpu.mtvec); 
+	for (int i = 0; i < 32;i++)
+        printf("%-7s  : " FMT_WORD_INT "(" FMT_WORD ")\n", regs[i], cpu.gpr[i], cpu.gpr[i]);
+    printf("pc       : " FMT_WORD_INT "(" FMT_WORD ")\n", cpu.pc, cpu.pc);
+    printf("mtvec    : " FMT_WORD_INT "(" FMT_WORD ")\n", cpu.mtvec, cpu.mtvec);
+    printf("mstatus  : " FMT_WORD_INT "(" FMT_WORD ")\n", cpu.mstatus, cpu.mstatus);
+    printf("mcause   : " FMT_WORD_INT "(" FMT_WORD ")\n", cpu.mcause, cpu.mcause);
+    printf("mepc     : " FMT_WORD_INT "(" FMT_WORD ")\n", cpu.mepc, cpu.mepc);
+    printf("stvec    : " FMT_WORD_INT "(" FMT_WORD ")\n", cpu.stvec, cpu.stvec);
+    printf("scause   : " FMT_WORD_INT "(" FMT_WORD ")\n", cpu.scause, cpu.scause);
+    printf("sepc     : " FMT_WORD_INT "(" FMT_WORD ")\n", cpu.sepc, cpu.sepc);
+    printf("satp     : " FMT_WORD_INT "(" FMT_WORD ")\n", cpu.satp, cpu.satp);
+    printf("privilege: %s\n", privileges[cpu.privilege]);
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {
-  int idx=0;
-  char str[10];
-  strcpy(str,s+1); //去除最左边的$
-  if(strcmp(str,"pc")==0) return cpu.pc; //如果是pc那就返回cpu.pc的值
-  for(int i=0;i<32;i++){
-    if(strcmp(regs[i],str)==0){
-      idx=i; //返回索引值
-      break;
+    for (int i = 0; i < 32;i++){
+        // printf("%s vs %s\n", regs[i], s);
+        if (strcmp(regs[i], s)==0){
+            return gpr(i);
+        }
     }
-    if(i==31) *success=false;
-  }
-  return gpr(idx);
+    if(strcmp("pc",s)==0)
+        return cpu.pc;
+    if (strcmp("mtvec", s) == 0)
+        return cpu.mtvec;
+    if (strcmp("mstatus", s) == 0)
+        return cpu.mstatus;
+    if (strcmp("mcause", s) == 0)
+        return cpu.mcause;
+    if (strcmp("mepc", s) == 0)
+        return cpu.mepc;
+    printf("the register name is error\n");
+    assert(0);
 }

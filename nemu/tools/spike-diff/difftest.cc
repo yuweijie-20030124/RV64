@@ -1,5 +1,5 @@
 /***************************************************************************************
-* Copyright (c) 2014-2024 Zihao Yu, Nanjing University
+* Copyright (c) 2014-2022 Zihao Yu, Nanjing University
 *
 * NEMU is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
@@ -39,10 +39,6 @@ static debug_module_config_t difftest_dm_config = {
 struct diff_context_t {
   word_t gpr[MUXDEF(CONFIG_RVE, 16, 32)];
   word_t pc;
-  word_t mcause;
-  word_t mstatus;
-  vaddr_t mepc;
-  word_t mtvec;
 };
 
 static sim_t* s = NULL;
@@ -58,18 +54,12 @@ void sim_t::diff_step(uint64_t n) {
   step(n);
 }
 
-
-//加内部寄存器得来这里修改读写逻辑。
 void sim_t::diff_get_regs(void* diff_context) {
   struct diff_context_t* ctx = (struct diff_context_t*)diff_context;
   for (int i = 0; i < NR_GPR; i++) {
     ctx->gpr[i] = state->XPR[i];
   }
   ctx->pc = state->pc;
-  ctx->mcause = state->mcause->read();
-  ctx->mstatus = state->mstatus->read();
-  ctx->mepc = state->mepc->read();
-  ctx->mtvec = state->mtvec->read();
 }
 
 void sim_t::diff_set_regs(void* diff_context) {
@@ -78,10 +68,6 @@ void sim_t::diff_set_regs(void* diff_context) {
     state->XPR.write(i, (sword_t)ctx->gpr[i]);
   }
   state->pc = ctx->pc;
-  state->mcause->write(ctx->mcause);
-  state->mstatus->write(ctx->mstatus);
-  state->mepc->write(ctx->mepc);
-  state->mtvec->write(ctx->mtvec);
 }
 
 void sim_t::diff_memcpy(reg_t dest, void* src, size_t n) {
@@ -116,7 +102,7 @@ __EXPORT void difftest_exec(uint64_t n) {
 __EXPORT void difftest_init(int port) {
   difftest_htif_args.push_back("");
   const char *isa = "RV" MUXDEF(CONFIG_RV64, "64", "32") MUXDEF(CONFIG_RVE, "E", "I") "MAFDC";
-  cfg_t *cfg = new cfg_t(/*default_initrd_bounds=*/std::make_pair((reg_t)0, (reg_t)0),
+  cfg_t cfg(/*default_initrd_bounds=*/std::make_pair((reg_t)0, (reg_t)0),
             /*default_bootargs=*/nullptr,
             /*default_isa=*/isa,
             /*default_priv=*/DEFAULT_PRIV,
@@ -128,7 +114,7 @@ __EXPORT void difftest_init(int port) {
             /*default_hartids=*/std::vector<size_t>(1),
             /*default_real_time_clint=*/false,
             /*default_trigger_count=*/4);
-  s = new sim_t(cfg, false,
+  s = new sim_t(&cfg, false,
       difftest_mem, difftest_plugin_devices, difftest_htif_args,
       difftest_dm_config, nullptr, false, NULL,
       false,

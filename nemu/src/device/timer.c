@@ -1,5 +1,5 @@
 /***************************************************************************************
-* Copyright (c) 2014-2024 Zihao Yu, Nanjing University
+* Copyright (c) 2014-2022 Zihao Yu, Nanjing University
 *
 * NEMU is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
@@ -20,12 +20,22 @@
 static uint32_t *rtc_port_base = NULL;
 
 static void rtc_io_handler(uint32_t offset, int len, bool is_write) {
-  assert(offset == 0 || offset == 4);
-  if (!is_write && offset == 4) {
-    uint64_t us = get_time();
-    rtc_port_base[0] = us &  0xffffffff;   //取低32位
-    rtc_port_base[1] = us >> 32;           //取高32位
-  }
+    assert(offset == 0 || offset == 4);
+    if (is_write){
+        if ((*rtc_port_base) == 0xffffffff){
+            uint64_t us = get_time();
+            rtc_port_base[0] = (uint32_t)us;
+            rtc_port_base[1] = us >> 32;
+        }
+        else if ((*rtc_port_base) == 0x0){
+            uint64_t us = get_now_time();
+            rtc_port_base[0] = (uint32_t)us;
+            rtc_port_base[1] = us >> 32;
+        }
+        else{
+            panic(ANSI_FMT("error key of get time\n",ANSI_FG_RED));
+        }
+    }
 }
 
 #ifndef CONFIG_TARGET_AM
@@ -38,7 +48,7 @@ static void timer_intr() {
 #endif
 
 void init_timer() {
-  rtc_port_base = (uint32_t *)new_space(8);//申请八个字节 给64时钟
+  rtc_port_base = (uint32_t *)new_space(8);
 #ifdef CONFIG_HAS_PORT_IO
   add_pio_map ("rtc", CONFIG_RTC_PORT, rtc_port_base, 8, rtc_io_handler);
 #else

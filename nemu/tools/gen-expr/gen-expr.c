@@ -31,100 +31,130 @@ static char *code_format =
 "  return 0; "
 "}";
 
-static unsigned choose(unsigned n) {
-    return rand() % n;
+int piont = 0;
+
+static void gen_num(){
+  if(piont==65535)
+    return;
+  uint32_t val = rand();
+  int now_piont = piont;
+  int temp_piont;
+  while (val != 0)
+  {
+    char inttochar = (val % 10) + 0x30;
+    buf[now_piont] = inttochar;
+    now_piont++;
+    val /= 10;
+  }
+  temp_piont = now_piont - 1;
+  for (int i = piont; i < temp_piont; i++,temp_piont--)
+  {
+    char temp;
+    temp = buf[i];
+    buf[i] = buf[temp_piont];
+    buf[temp_piont] = temp;
+  }
+  piont = now_piont;
+  // buf[piont] = 'U';
+  // piont++;
 }
 
-static void gen(char s) {
-    char add_str[] = {s, '\0'};
-    strcat(buf, add_str);
+static void gen_rand_op(){
+  if(piont==65535)
+    return;
+  switch (rand()%4)
+  {
+  case 0:
+    buf[piont] = '+';
+    piont++;
+    break;
+  case 1:
+    buf[piont] = '-';
+    piont++;
+    break;
+  case 2:
+    buf[piont] = '*';
+    piont++;
+    break;
+  case 3:
+    buf[piont] = '/';
+    piont++;
+    break;
+  default:
+    break;
+  }
 }
 
-static void gen_num() {
-    char num_str[70];
-    // 确保不生成0，避免除0情况（在gen_rand_expr中处理）
-    sprintf(num_str, "%u", choose(99) + 1); // 生成1-99的数字
-    strcat(buf, num_str);
+static void gen_back(){
+  if(piont==65535)
+    return;
+  int y = rand()%5;
+  for (int i = 0; i < y;i++){
+    buf[piont] = ' ';
+    piont++;
+  }
 }
 
-static void gen_space() {
-    for (int i = 0; i < choose(5); i++) {
-        if (choose(11) > 9) {
-            strcat(buf, " ");
-        }
-    }
-}
-
-static void gen_rand_op() {
-    char op_list[] = {'+', '-', '*'};
-    char add_str[] = {op_list[choose(3)], '\0'};
-    strcat(buf, add_str);
-}
-
-static void gen_rand_expr(int depth) {
-    if (strlen(buf) > 65536 - 20000 || depth > 12) {
-        gen_num();
-        return;
-    }
-    gen_space();
-    switch (choose(3)) {
-        case 0: 
-            gen_num();
-            break;
-        case 1: 
-            gen('('); 
-            gen_rand_expr(depth + 1); 
-            gen(')');
-            break;
-        default: 
-            // 处理除法情况
-            if (choose(4) == 0) { // 25%概率生成除法
-                gen_rand_expr(depth + 1);
-                gen('/');
-                // 确保除数不为0
-                gen_num(); // 除数总是非零
-            } else {
-                gen_rand_expr(depth + 1);
-                gen_rand_op();
-                gen_rand_expr(depth + 1);
-            }
-            break;
-    }
-    gen_space();
+static void gen_rand_expr() {
+  if(piont==65535)
+    return;
+  switch (rand() % 3)
+  {
+  case 0:
+    gen_num();
+    break;
+  case 1:
+    buf[piont] = '(';
+    piont++;
+    gen_back();
+    gen_rand_expr();
+    gen_back();
+    buf[piont] = ')';
+    piont++;
+    break;
+  default:
+    gen_rand_expr();
+    gen_back();
+    gen_rand_op();
+    gen_back();
+    gen_rand_expr();
+    break;
+  }
 }
 
 int main(int argc, char *argv[]) {
-    int seed = time(0);
-    srand(seed);
-    int loop = 1;
-    if (argc > 1) {
-        sscanf(argv[1], "%d", &loop);
-    }
-    int i;
-    for (i = 0; i < loop; i++) {
-        buf[0] = '\0';
-        gen_rand_expr(0);
+  int seed = time(0);
+  srand(seed);
+  int loop = 1;
+  if (argc > 1) {
+    sscanf(argv[1], "%d", &loop);
+  }
+  int i;
+  for (i = 0; i < loop; i ++) {
+    do{
+      piont = 0;
+      gen_rand_expr();
+      buf[piont] = '\0';
+    }while(piont==65535);
 
-        sprintf(code_buf, code_format, buf);
+    sprintf(code_buf, code_format, buf);
 
-        FILE *fp = fopen("/tmp/.code.c", "w");
-        assert(fp != NULL);
-        fputs(code_buf, fp);
-        fclose(fp);
+    FILE *fp = fopen("/tmp/.code.c", "w");
+    assert(fp != NULL);
+    fputs(code_buf, fp);
+    fclose(fp);
 
-        int ret = system("gcc /tmp/.code.c -o /tmp/.expr");
-        if (ret != 0) continue;
+    int ret = system("gcc /tmp/.code.c -o /tmp/.expr");
+    if (ret != 0) continue;
 
-        fp = popen("/tmp/.expr", "r");
-        assert(fp != NULL);
+    fp = popen("/tmp/.expr", "r");
+    assert(fp != NULL);
 
-        uint32_t result;
-        if (fscanf(fp, "%u", &result)) {
-            if (pclose(fp) != 0) {
-                continue;
-            }
-            printf("%u %s\n", result, buf);
-        }
-    }
-    return 0;
+    int result;
+    ret = fscanf(fp, "%d", &result);
+    pclose(fp);
+
+    printf("%u %s\n", result, buf);
+  }
+  return 0;
 }

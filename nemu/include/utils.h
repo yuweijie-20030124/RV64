@@ -1,5 +1,5 @@
 /***************************************************************************************
-* Copyright (c) 2014-2024 Zihao Yu, Nanjing University
+* Copyright (c) 2014-2022 Zihao Yu, Nanjing University
 *
 * NEMU is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
@@ -33,6 +33,7 @@ extern NEMUState nemu_state;
 // ----------- timer -----------
 
 uint64_t get_time();
+uint64_t get_now_time();
 
 // ----------- log -----------
 
@@ -49,7 +50,7 @@ uint64_t get_time();
 #define ANSI_BG_GREEN   "\33[1;42m"
 #define ANSI_BG_YELLOW  "\33[1;43m"
 #define ANSI_BG_BLUE    "\33[1;44m"
-#define ANSI_BG_MAGENTA "\33[1;45m"
+#define ANSI_BG_MAGENTA "\33[1;35m"
 #define ANSI_BG_CYAN    "\33[1;46m"
 #define ANSI_BG_WHITE   "\33[1;47m"
 #define ANSI_NONE       "\33[0m"
@@ -60,7 +61,7 @@ uint64_t get_time();
   do { \
     extern FILE* log_fp; \
     extern bool log_enable(); \
-    if (log_enable() && log_fp != NULL) { \
+    if (log_enable()) { \
       fprintf(log_fp, __VA_ARGS__); \
       fflush(log_fp); \
     } \
@@ -73,5 +74,42 @@ uint64_t get_time();
     log_write(__VA_ARGS__); \
   } while (0)
 
+#define log_mem_write(addr, ...)                     \
+    IFDEF(                                           \
+        CONFIG_TARGET_NATIVE_ELF,                    \
+        do {                                         \
+            extern FILE *log_fp;                     \
+            extern bool log_mem_enable(paddr_t addr); \
+            if (log_mem_enable(addr))                \
+            {                                        \
+                fprintf(log_fp, __VA_ARGS__);        \
+                fflush(log_fp);                      \
+            }                                        \
+        } while (0))
+
+#define MEM_PRINTF_ENABLE MUXDEF(CONFIG_MTRACE_print,true,false)
+
+#define _Log_mem(addr, ...)               \
+    do                                    \
+    {                                     \
+        if (MEM_PRINTF_ENABLE)          \
+            printf(__VA_ARGS__);          \
+        log_mem_write(addr, __VA_ARGS__); \
+    } while (0)
+
+#define log_FTRACE(...) IFDEF(CONFIG_TARGET_NATIVE_ELF, \
+  do { \
+    extern FILE* log_fp; \
+    fprintf(log_fp, __VA_ARGS__); \
+    fflush(log_fp); \
+  } while (0) \
+)
+
+#define Log_func(...)            \
+    do                           \
+    {                            \
+        printf(__VA_ARGS__);     \
+        log_FTRACE(__VA_ARGS__); \
+    } while (0)
 
 #endif

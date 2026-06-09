@@ -1,5 +1,5 @@
 /***************************************************************************************
-* Copyright (c) 2014-2024 Zihao Yu, Nanjing University
+* Copyright (c) 2014-2022 Zihao Yu, Nanjing University
 *
 * NEMU is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
@@ -16,6 +16,8 @@
 #include <isa.h>
 #include <memory/paddr.h>
 
+void riscv_debug_module_proc_reset(unsigned id);
+
 // this is not consistent with uint8_t
 // but it is ok since we do not access the array directly
 static const uint32_t img [] = {
@@ -28,11 +30,45 @@ static const uint32_t img [] = {
 
 static void restart() {
   /* Set the initial program counter. */
-  cpu.pc = RESET_VECTOR;
-  cpu.mstatus = 0xa00001800;
-  // cpu.mstatus = 0xa00021800;
+  cpu.pc    = RESET_VECTOR;
+  cpu.mtvec = RESET_VECTOR;
+  cpu.stvec = RESET_VECTOR;
   /* The zero register is always 0. */
   cpu.gpr[0] = 0;
+
+  cpu.mstatus = MUXDEF(CONFIG_ISA64, 0xa00001800, 0x1800);
+
+  cpu.mvendorid = (word_t)0x79737978;
+  cpu.marchid =  (word_t)23060081;
+  cpu.mimpid = (word_t)0x797379785f6C6278;
+  cpu.mhartid = 0;
+  cpu.mconfigptr = 0;
+  cpu.menvcfg = 0;
+  cpu.mseccfg = 0;
+  cpu.senvcfg = 0;
+  cpu.mcounteren = 0xfffffffd;
+  cpu.scounteren = 0x0;
+  cpu.misa = MUXDEF(CONFIG_ISA64, 0x8000000000141105, 0x80141105);
+#ifndef CONFIG_RV64
+  cpu.mstatush = 0;
+  cpu.mstatush = 0;
+  cpu.menvcfgh = 0;
+  cpu.mseccfgh = 0;
+#endif
+
+    cpu.privilege = PRV_M;
+    cpu.debug_mode = false;
+    cpu.setp_check = false;
+    cpu.dcsr = 0x40000813;
+    cpu.dpc = 0;
+    cpu.dscratch0 = 0;
+    cpu.dscratch1 = 0;
+    IFDEF(CONFIG_HAS_RISCV_DM, riscv_debug_module_proc_reset(0));
+}
+
+void riscv_cpu_restart() {
+    /* Initialize this virtual computer system. */
+    restart();
 }
 
 void init_isa() {

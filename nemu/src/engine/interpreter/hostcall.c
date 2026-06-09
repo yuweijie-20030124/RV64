@@ -1,5 +1,5 @@
 /***************************************************************************************
-* Copyright (c) 2014-2024 Zihao Yu, Nanjing University
+* Copyright (c) 2014-2022 Zihao Yu, Nanjing University
 *
 * NEMU is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
@@ -18,11 +18,13 @@
 #include <isa.h>
 #include <cpu/difftest.h>
 
-void set_nemu_state(int state, vaddr_t pc, int halt_ret) {
-  difftest_skip_ref();
-  nemu_state.state = state;
-  nemu_state.halt_pc = pc; 
-  nemu_state.halt_ret = halt_ret;
+extern void irangbuf_printf();
+
+void set_nemu_state(int state, vaddr_t pc, int halt_ret){
+    difftest_skip_ref();
+    nemu_state.state = state;
+    nemu_state.halt_pc = pc;
+    nemu_state.halt_ret = halt_ret;
 }
 
 __attribute__((noinline))
@@ -46,6 +48,9 @@ void invalid_inst(vaddr_t thispc) {
         "If it is the second case, remember:\n"
         "* The machine is always right!\n"
         "* Every line of untested code is always wrong!\n\n", ANSI_FG_RED), isa_logo);
+
+  IFDEF(CONFIG_ITRACE, irangbuf_printf());
+  isa_reg_display();
 
   set_nemu_state(NEMU_ABORT, thispc, -1);
 }
