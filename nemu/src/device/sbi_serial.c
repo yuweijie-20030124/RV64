@@ -39,9 +39,11 @@ static void key_enqueue(uint8_t am_scancode){
     Assert(key_r != key_f, "key queue overflow!");
 }
 
+//等待键盘输入
 static void poll_stdin_key()
-{
+{   // 轮询
     while (true) {
+        // fd_set
         fd_set readfds;
         struct timeval timeout = {0, 0};
         FD_ZERO(&readfds);
@@ -94,14 +96,14 @@ void send_key_sbi_serial(uint8_t scancode, bool is_keydown){
     }
 }
 
-#define DR_OFFSET  0
-#define IER_OFFSET 1
-#define IIR_OFFSET 2
-#define LCR_OFFSET 3
-#define MCR_OFFSET 4
-#define LSR_OFFSET 5
-#define MSR_OFFSET 6
-#define SCR_OFFSET 7
+#define DR_OFFSET  0 // 数据寄存器     
+#define IER_OFFSET 1 // 中断使能寄存器 
+#define IIR_OFFSET 2 // 中断原因寄存器 
+#define LCR_OFFSET 3 // 线路控制寄存器 
+#define MCR_OFFSET 4 //                
+#define LSR_OFFSET 5 // 线路状态寄存器 
+#define MSR_OFFSET 6 
+#define SCR_OFFSET 7 
 
 #define UART_IRQ 10
 #define UART_IER_RDI  0x01
@@ -120,6 +122,7 @@ static uint8_t sbi_serial_divh = 0;
 static uint8_t sbi_serial_divl = 0;
 static bool sbi_serial_tx_irq_pending = false;
 
+// 触发中断
 void sbi_plic_set_pending(uint32_t irq);
 void sbi_plic_clear_pending(uint32_t irq);
 
@@ -137,7 +140,9 @@ static void sbi_serial_update_irq()
 void update_sbi_serial()
 {
     poll_stdin_key();
+    // 轮询键盘输入
     sbi_serial_update_irq();
+    // 更新UART中断状态
 }
 
 static void sbi_serial_putc(char ch)

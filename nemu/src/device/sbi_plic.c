@@ -45,9 +45,9 @@ static uint32_t sbi_plic_next_irq()
 static void sbi_plic_update_mip()
 {
     if (sbi_plic_next_irq() != 0) {
-        cpu.mip |= (1UL << S_MODE_EXTERNAL_INTERRUPT);
+        cpu.mip |= (1UL << S_MODE_EXTERNAL_INTERRUPT); //mie置为1
     } else {
-        cpu.mip &= ~(1UL << S_MODE_EXTERNAL_INTERRUPT);
+        cpu.mip &= ~(1UL << S_MODE_EXTERNAL_INTERRUPT); //mie置为0
     }
 }
 
